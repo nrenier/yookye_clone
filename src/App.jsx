@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 
 // Yookye theme colors
 const theme = createTheme({
@@ -35,6 +36,7 @@ function App() {
           <Route path="/form" element={<FormPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Router>
     </ThemeProvider>
