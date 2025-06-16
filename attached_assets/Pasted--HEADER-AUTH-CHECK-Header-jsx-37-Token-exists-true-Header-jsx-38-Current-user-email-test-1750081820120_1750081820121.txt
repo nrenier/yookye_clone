@@ -1,0 +1,90 @@
+=== HEADER AUTH CHECK ===
+Header.jsx:37 Token exists: true
+Header.jsx:38 Current user: {email: 'test_2@test.com', id: 'c8d08047-15a3-4537-9dd2-a0a25f2af69b', name: 'test_2@test.com', username: 'test_2'}
+Header.jsx:36 === HEADER AUTH CHECK ===
+Header.jsx:37 Token exists: true
+Header.jsx:38 Current user: undefined
+Header.jsx:42 Trying to get profile...
+Header.jsx:48 setUser is not a function
+checkAuthStatus @ Header.jsx:48
+await in checkAuthStatus
+(anonime) @ Header.jsx:31
+commitHookEffectListMount @ chunk-H6ROQLGZ.js?v=2ddab5cf:16961
+commitPassiveMountOnFiber @ chunk-H6ROQLGZ.js?v=2ddab5cf:18204
+commitPassiveMountEffects_complete @ chunk-H6ROQLGZ.js?v=2ddab5cf:18177
+commitPassiveMountEffects_begin @ chunk-H6ROQLGZ.js?v=2ddab5cf:18167
+commitPassiveMountEffects @ chunk-H6ROQLGZ.js?v=2ddab5cf:18157
+flushPassiveEffectsImpl @ chunk-H6ROQLGZ.js?v=2ddab5cf:19541
+flushPassiveEffects @ chunk-H6ROQLGZ.js?v=2ddab5cf:19498
+(anonime) @ chunk-H6ROQLGZ.js?v=2ddab5cf:19379
+workLoop @ chunk-H6ROQLGZ.js?v=2ddab5cf:195
+flushWork @ chunk-H6ROQLGZ.js?v=2ddab5cf:174
+performWorkUntilDeadline @ chunk-H6ROQLGZ.js?v=2ddab5cf:382Comprendi l'avviso
+ProfilePage.jsx:372 
+            
+            
+           GET http://localhost:3001/api/auth/session-debug 401 (UNAUTHORIZED)
+onClick @ ProfilePage.jsx:372
+callCallback2 @ chunk-H6ROQLGZ.js?v=2ddab5cf:3678
+invokeGuardedCallbackDev @ chunk-H6ROQLGZ.js?v=2ddab5cf:3703
+invokeGuardedCallback @ chunk-H6ROQLGZ.js?v=2ddab5cf:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-H6ROQLGZ.js?v=2ddab5cf:3740
+executeDispatch @ chunk-H6ROQLGZ.js?v=2ddab5cf:7044
+processDispatchQueueItemsInOrder @ chunk-H6ROQLGZ.js?v=2ddab5cf:7064
+processDispatchQueue @ chunk-H6ROQLGZ.js?v=2ddab5cf:7073
+dispatchEventsForPlugins @ chunk-H6ROQLGZ.js?v=2ddab5cf:7081
+(anonime) @ chunk-H6ROQLGZ.js?v=2ddab5cf:7204
+batchedUpdates$1 @ chunk-H6ROQLGZ.js?v=2ddab5cf:18964
+batchedUpdates @ chunk-H6ROQLGZ.js?v=2ddab5cf:3583
+dispatchEventForPluginEventSystem @ chunk-H6ROQLGZ.js?v=2ddab5cf:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-H6ROQLGZ.js?v=2ddab5cf:5482
+dispatchEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5476
+dispatchDiscreteEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5453Comprendi l'errore
+ProfilePage.jsx:379 Session debug data: {error: 'Invalid token', message: 'Please provide a valid token'}
+api.js:32 
+            
+            
+           POST http://localhost:3001/api/auth/logout 500 (INTERNAL SERVER ERROR)
+apiCall @ api.js:32
+logout @ api.js:125
+handleLogout @ ProfilePage.jsx:101
+callCallback2 @ chunk-H6ROQLGZ.js?v=2ddab5cf:3678
+invokeGuardedCallbackDev @ chunk-H6ROQLGZ.js?v=2ddab5cf:3703
+invokeGuardedCallback @ chunk-H6ROQLGZ.js?v=2ddab5cf:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-H6ROQLGZ.js?v=2ddab5cf:3740
+executeDispatch @ chunk-H6ROQLGZ.js?v=2ddab5cf:7044
+processDispatchQueueItemsInOrder @ chunk-H6ROQLGZ.js?v=2ddab5cf:7064
+processDispatchQueue @ chunk-H6ROQLGZ.js?v=2ddab5cf:7073
+dispatchEventsForPlugins @ chunk-H6ROQLGZ.js?v=2ddab5cf:7081
+(anonime) @ chunk-H6ROQLGZ.js?v=2ddab5cf:7204
+batchedUpdates$1 @ chunk-H6ROQLGZ.js?v=2ddab5cf:18964
+batchedUpdates @ chunk-H6ROQLGZ.js?v=2ddab5cf:3583
+dispatchEventForPluginEventSystem @ chunk-H6ROQLGZ.js?v=2ddab5cf:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-H6ROQLGZ.js?v=2ddab5cf:5482
+dispatchEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5476
+dispatchDiscreteEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5453Comprendi l'errore
+api.js:127 Logout error: Error: Logout failed
+    at handleResponse (api.js:61:11)
+    at async Object.logout (api.js:125:7)
+    at async handleLogout (ProfilePage.jsx:101:7)
+logout @ api.js:127
+await in logout
+handleLogout @ ProfilePage.jsx:101
+callCallback2 @ chunk-H6ROQLGZ.js?v=2ddab5cf:3678
+invokeGuardedCallbackDev @ chunk-H6ROQLGZ.js?v=2ddab5cf:3703
+invokeGuardedCallback @ chunk-H6ROQLGZ.js?v=2ddab5cf:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-H6ROQLGZ.js?v=2ddab5cf:3740
+executeDispatch @ chunk-H6ROQLGZ.js?v=2ddab5cf:7044
+processDispatchQueueItemsInOrder @ chunk-H6ROQLGZ.js?v=2ddab5cf:7064
+processDispatchQueue @ chunk-H6ROQLGZ.js?v=2ddab5cf:7073
+dispatchEventsForPlugins @ chunk-H6ROQLGZ.js?v=2ddab5cf:7081
+(anonime) @ chunk-H6ROQLGZ.js?v=2ddab5cf:7204
+batchedUpdates$1 @ chunk-H6ROQLGZ.js?v=2ddab5cf:18964
+batchedUpdates @ chunk-H6ROQLGZ.js?v=2ddab5cf:3583
+dispatchEventForPluginEventSystem @ chunk-H6ROQLGZ.js?v=2ddab5cf:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-H6ROQLGZ.js?v=2ddab5cf:5482
+dispatchEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5476
+dispatchDiscreteEvent @ chunk-H6ROQLGZ.js?v=2ddab5cf:5453Comprendi l'errore
+Header.jsx:36 === HEADER AUTH CHECK ===
+Header.jsx:37 Token exists: false
+Header.jsx:38 Current user: {email: 'test_2@test.com', id: 'c8d08047-15a3-4537-9dd2-a0a25f2af69b', name: 'test_2@test.com', username: 'test_2'}
