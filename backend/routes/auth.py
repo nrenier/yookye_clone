@@ -225,8 +225,13 @@ def get_profile():
                 blacklist_doc = opensearch_ops.get_document('blacklisted_tokens', jti)
                 print(f"Token {jti} is blacklisted!")
                 return jsonify({'error': 'Invalid token'}), 401
-            except:
-                print(f"Token {jti} is not blacklisted")
+            except Exception as e:
+                # If index doesn't exist or token not found, it's not blacklisted
+                if "index_not_found_exception" in str(e) or "NotFoundError" in str(e):
+                    print(f"Token {jti} is not blacklisted (index may not exist yet)")
+                else:
+                    print(f"Error checking blacklist: {e}")
+                    print(f"Token {jti} is not blacklisted")
 
         # Validate session is still active
         if jti:
@@ -320,6 +325,9 @@ def logout():
         print(f"User ID: {current_user_id}")
         print(f"JWT ID: {jti}")
 
+        # Ensure blacklisted_tokens index exists
+        opensearch_ops.ensure_index_exists('blacklisted_tokens')
+        
         # Add token to blacklist in OpenSearch
         opensearch_ops.create_document('blacklisted_tokens', jti, {
             'jti': jti,
@@ -374,9 +382,12 @@ def session_debug():
             blacklist_doc = opensearch_ops.get_document('blacklisted_tokens', jti)
             token_blacklisted = True
             print("Token is blacklisted")
-        except:
+        except Exception as e:
             token_blacklisted = False
-            print("Token is not blacklisted")
+            if "index_not_found_exception" in str(e):
+                print("Token is not blacklisted (blacklist index doesn't exist yet)")
+            else:
+                print("Token is not blacklisted")
 
         # Get user sessions
         session_query = {
