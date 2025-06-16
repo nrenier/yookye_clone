@@ -365,71 +365,7 @@ def logout():
         print(f"Logout error: {str(e)}")
         return jsonify({'error': 'Logout failed', 'details': str(e)}), 500
 
-@auth_bp.route('/session-debug', methods=['GET'])
-@jwt_required()
-def session_debug():
-    """Debug endpoint to check session status"""
-    try:
-        current_user_id = get_jwt_identity()
-        jti = get_jwt()['jti']
 
-        print(f"=== SESSION DEBUG ===")
-        print(f"User ID: {current_user_id}")
-        print(f"JWT ID: {jti}")
-
-        # Check if token is blacklisted
-        try:
-            blacklist_doc = opensearch_ops.get_document('blacklisted_tokens', jti)
-            token_blacklisted = True
-            print("Token is blacklisted")
-        except Exception as e:
-            token_blacklisted = False
-            if "index_not_found_exception" in str(e):
-                print("Token is not blacklisted (blacklist index doesn't exist yet)")
-            else:
-                print("Token is not blacklisted")
-
-        # Get user sessions
-        session_query = {
-            "query": {
-                "term": {"user_id": current_user_id}
-            },
-            "sort": [{"created_at": {"order": "desc"}}]
-        }
-
-        sessions_response = opensearch_ops.search_documents('sessions', session_query)
-        sessions = []
-
-        for hit in sessions_response['hits']['hits']:
-            session_data = hit['_source']
-            session_data['session_id'] = hit['_id']
-            sessions.append(session_data)
-            print(f"Session {hit['_id']}: active={session_data.get('is_active', False)}")
-
-        # Get user info
-        user_doc = opensearch_ops.get_document('users', current_user_id)
-        user_info = user_doc['_source']
-
-        debug_info = {
-            'user_id': current_user_id,
-            'jti': jti,
-            'token_blacklisted': token_blacklisted,
-            'user_info': {
-                'email': user_info.get('email'),
-                'name': user_info.get('name'),
-                'created_at': user_info.get('created_at')
-            },
-            'sessions': sessions,
-            'total_sessions': len(sessions),
-            'active_sessions': len([s for s in sessions if s.get('is_active', False)])
-        }
-
-        print(f"Debug info compiled: {debug_info}")
-        return jsonify(debug_info), 200
-
-    except Exception as e:
-        print(f"Session debug error: {str(e)}")
-        return jsonify({'error': 'Session debug failed', 'details': str(e)}), 500
 
 @auth_bp.route('/sessions', methods=['GET'])
 @jwt_required()

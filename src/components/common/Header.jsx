@@ -107,24 +107,7 @@ function Header({ user, setUser }) {
     }
   };
 
-  const handleSessionDebug = async () => {
-    try {
-      console.log("=== SESSION DEBUG ===");
-      const response = await fetch('http://localhost:3001/api/auth/session-debug', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const debugData = await response.json();
-      console.log("Session debug data:", debugData);
-      alert(`Session Debug:\n${JSON.stringify(debugData, null, 2)}`);
-    } catch (error) {
-      console.error("Session debug error:", error);
-      alert(`Session debug failed: ${error.message}`);
-    }
-  };
+  
 
   const menuItems = [
     { label: "Come funziona", path: "/come-funziona" },
@@ -224,10 +207,7 @@ function Header({ user, setUser }) {
                       <Person sx={{ mr: 2 }} />
                       Il mio profilo
                     </MenuItem>
-                    <MenuItem onClick={() => { handleSessionDebug(); handleUserMenuClose(); }}>
-                      <Settings sx={{ mr: 2 }} />
-                      Debug Sessione
-                    </MenuItem>
+                    
                     <MenuItem onClick={handleLogout}>
                       <ExitToApp sx={{ mr: 2 }} />
                       Logout
