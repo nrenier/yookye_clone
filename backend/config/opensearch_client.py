@@ -12,12 +12,8 @@ logger = logging.getLogger(__name__)
 opensearch_client = None
 
 # In-memory mockup data storage
-mock_data = {
-    'users': [],
-    'travels': [],
-    'preferences': [],
-    'sessions': []
-}
+mock_data = {'users': [], 'travels': [], 'preferences': [], 'sessions': []}
+
 
 def init_opensearch():
     """Initialize OpenSearch client or use mockup"""
@@ -31,13 +27,14 @@ def init_opensearch():
         password = os.getenv('OPENSEARCH_PASSWORD', 'admin')
         use_ssl = os.getenv('OPENSEARCH_USE_SSL', 'false').lower() == 'true'
 
-        opensearch_client = OpenSearch(
-            hosts=[{'host': host, 'port': port}],
-            http_auth=(username, password),
-            use_ssl=use_ssl,
-            verify_certs=False,
-            ssl_show_warn=False
-        )
+        opensearch_client = OpenSearch(hosts=[{
+            'host': host,
+            'port': port
+        }],
+                                       http_auth=(username, password),
+                                       use_ssl=use_ssl,
+                                       verify_certs=False,
+                                       ssl_show_warn=False)
 
         # Test connection
         info = opensearch_client.info()
@@ -51,6 +48,7 @@ def init_opensearch():
         logger.info("🔧 Using in-memory mockup data storage")
         opensearch_client = None
 
+
 def create_indices():
     """Create OpenSearch indices if they don't exist"""
     if not opensearch_client:
@@ -60,67 +58,128 @@ def create_indices():
         'users': {
             'mappings': {
                 'properties': {
-                    'id': {'type': 'keyword'},
-                    'email': {'type': 'keyword'},
-                    'password': {'type': 'keyword'},
-                    'name': {'type': 'text'},
-                    'username': {'type': 'keyword'}
+                    'id': {
+                        'type': 'keyword'
+                    },
+                    'email': {
+                        'type': 'keyword'
+                    },
+                    'password': {
+                        'type': 'keyword'
+                    },
+                    'name': {
+                        'type': 'text'
+                    },
+                    'username': {
+                        'type': 'keyword'
+                    }
                 }
             }
         },
         'travels': {
             'mappings': {
                 'properties': {
-                    'user_id': {'type': 'keyword'},
-                    'passions': {'type': 'keyword'},
-                    'destinations': {'type': 'text'},
-                    'travel_pace': {'type': 'keyword'},
-                    'accommodation_level': {'type': 'keyword'},
-                    'accommodation_type': {'type': 'keyword'},
-                    'travelers': {'type': 'object'},
-                    'budget': {'type': 'keyword'},
-                    'email': {'type': 'keyword'},
-                    'created_at': {'type': 'date'},
-                    'status': {'type': 'keyword'}
+                    'user_id': {
+                        'type': 'keyword'
+                    },
+                    'passions': {
+                        'type': 'keyword'
+                    },
+                    'destinations': {
+                        'type': 'text'
+                    },
+                    'travel_pace': {
+                        'type': 'keyword'
+                    },
+                    'accommodation_level': {
+                        'type': 'keyword'
+                    },
+                    'accommodation_type': {
+                        'type': 'keyword'
+                    },
+                    'travelers': {
+                        'type': 'object'
+                    },
+                    'budget': {
+                        'type': 'keyword'
+                    },
+                    'email': {
+                        'type': 'keyword'
+                    },
+                    'created_at': {
+                        'type': 'date'
+                    },
+                    'status': {
+                        'type': 'keyword'
+                    }
                 }
             }
         },
         'preferences': {
             'mappings': {
                 'properties': {
-                    'user_id': {'type': 'keyword'},
-                    'preferences': {'type': 'object'},
-                    'created_at': {'type': 'date'},
-                    'updated_at': {'type': 'date'}
+                    'user_id': {
+                        'type': 'keyword'
+                    },
+                    'preferences': {
+                        'type': 'object'
+                    },
+                    'created_at': {
+                        'type': 'date'
+                    },
+                    'updated_at': {
+                        'type': 'date'
+                    }
                 }
             }
         },
         'sessions': {
             'mappings': {
                 'properties': {
-                    'session_id': {'type': 'keyword'},
-                    'user_id': {'type': 'keyword'},
-                    'access_token_jti': {'type': 'keyword'},
-                    'refresh_token_jti': {'type': 'keyword'},
-                    'created_at': {'type': 'date'},
-                    'expires_at': {'type': 'date'},
-                    'last_activity': {'type': 'date'},
-                    'ip_address': {'type': 'ip'},
-                    'user_agent': {'type': 'text'},
-                    'is_active': {'type': 'boolean'}
+                    'session_id': {
+                        'type': 'keyword'
+                    },
+                    'user_id': {
+                        'type': 'keyword'
+                    },
+                    'access_token_jti': {
+                        'type': 'keyword'
+                    },
+                    'refresh_token_jti': {
+                        'type': 'keyword'
+                    },
+                    'created_at': {
+                        'type': 'date'
+                    },
+                    'expires_at': {
+                        'type': 'date'
+                    },
+                    'last_activity': {
+                        'type': 'date'
+                    },
+                    'ip_address': {
+                        'type': 'ip'
+                    },
+                    'user_agent': {
+                        'type': 'text'
+                    },
+                    'is_active': {
+                        'type': 'boolean'
+                    }
                 }
             }
-        }
         }
     }
 
     for index_name, mapping in indices.items():
         try:
             if not opensearch_client.indices.exists(index=index_name):
-                opensearch_client.indices.create(index=index_name, body=mapping)
+                opensearch_client.indices.create(index=index_name,
+                                                 body=mapping)
                 logger.info(f"📝 Created index: {index_name}")
         except Exception as e:
             logger.error(f"❌ Error creating index {index_name}: {e}")
+
 
 class OpenSearchOperations:
     """Wrapper class for OpenSearch operations with mockup fallback"""
@@ -130,12 +189,10 @@ class OpenSearchOperations:
         """Index a document"""
         if opensearch_client:
             try:
-                response = opensearch_client.index(
-                    index=index,
-                    id=doc_id,
-                    body=body,
-                    refresh=True
-                )
+                response = opensearch_client.index(index=index,
+                                                   id=doc_id,
+                                                   body=body,
+                                                   refresh=True)
                 return response
             except Exception as e:
                 logger.error(f"OpenSearch index error: {e}")
@@ -150,7 +207,9 @@ class OpenSearchOperations:
             try:
                 body = {
                     'size': size,
-                    'query': query if query else {'match_all': {}}
+                    'query': query if query else {
+                        'match_all': {}
+                    }
                 }
                 response = opensearch_client.search(index=index, body=body)
                 return response
@@ -178,12 +237,10 @@ class OpenSearchOperations:
         """Update a document"""
         if opensearch_client:
             try:
-                response = opensearch_client.update(
-                    index=index,
-                    id=doc_id,
-                    body={'doc': body},
-                    refresh=True
-                )
+                response = opensearch_client.update(index=index,
+                                                    id=doc_id,
+                                                    body={'doc': body},
+                                                    refresh=True)
                 return response
             except Exception as e:
                 logger.error(f"OpenSearch update error: {e}")
@@ -196,7 +253,9 @@ class OpenSearchOperations:
         """Delete a document"""
         if opensearch_client:
             try:
-                response = opensearch_client.delete(index=index, id=doc_id, refresh=True)
+                response = opensearch_client.delete(index=index,
+                                                    id=doc_id,
+                                                    refresh=True)
                 return response
             except Exception as e:
                 logger.error(f"OpenSearch delete error: {e}")
@@ -213,7 +272,9 @@ class OpenSearchOperations:
 
         doc = {
             '_id': doc_id,
-            '_source': {**body, '_timestamp': datetime.utcnow().isoformat()}
+            '_source': {
+                **body, '_timestamp': datetime.utcnow().isoformat()
+            }
         }
 
         # Remove existing document with same ID
@@ -237,7 +298,9 @@ class OpenSearchOperations:
 
         return {
             'hits': {
-                'total': {'value': len(mock_data[index])},
+                'total': {
+                    'value': len(mock_data[index])
+                },
                 'hits': hits
             }
         }
@@ -263,7 +326,8 @@ class OpenSearchOperations:
         for i, doc in enumerate(mock_data[index]):
             if doc['_id'] == doc_id:
                 mock_data[index][i]['_source'].update(body)
-                mock_data[index][i]['_source']['_timestamp'] = datetime.utcnow().isoformat()
+                mock_data[index][i]['_source']['_timestamp'] = datetime.utcnow(
+                ).isoformat()
                 return {
                     '_index': index,
                     '_id': doc_id,
@@ -306,6 +370,7 @@ class OpenSearchOperations:
         except Exception as e:
             print(f"Error ensuring index {index_name} exists: {e}")
             return False
+
 
 # Create instance for easy import
 opensearch_ops = OpenSearchOperations()
