@@ -1,12 +1,15 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from marshmallow import Schema, fields, ValidationError
-import uuid
-import os
 import requests
 from datetime import datetime
+from marshmallow import Schema, fields, ValidationError
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import urllib3
+import ssl
 
 from config.opensearch_client import opensearch_ops
+
+# Disable SSL warnings for development
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 travel_bp = Blueprint('travel', __name__)
 
@@ -17,35 +20,40 @@ def authenticate_external_api():
         api_url = os.getenv('TRAVEL_API_URL')
         api_username = os.getenv('TRAVEL_API_USERNAME')
         api_password = os.getenv('TRAVEL_API_PASSWORD')
-        
+
         if not all([api_url, api_username, api_password]):
             raise Exception("External API configuration is missing")
-        
+
         # Prepare authentication data
         auth_data = {
             'username': api_username,
             'password': api_password
         }
-        
+
         # Make authentication request
         auth_url = f"{api_url}/api/auth/token"
-        
+
+        # Make authentication request with SSL verification disabled for development
+        # In production, you should use proper SSL certificates
+        verify_ssl = not api_url.startswith('https://localhost')
+
         response = requests.post(
             auth_url,
             data=auth_data,  # OAuth2PasswordRequestForm expects form data
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            timeout=10
+            timeout=10,
+            verify=verify_ssl
         )
-        
+
         if response.status_code == 401:
             raise Exception("Invalid credentials for external API")
-        
+
         if not response.ok:
             raise Exception(f"External API authentication failed: {response.status_code}")
-        
+
         token_data = response.json()
         return token_data.get('access_token')
-        
+
     except requests.exceptions.RequestException as e:
         raise Exception(f"Failed to connect to external API: {str(e)}")
     except Exception as e:
