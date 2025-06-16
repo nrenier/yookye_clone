@@ -44,7 +44,7 @@ def register():
 
         # Create new user
         user_id = str(uuid.uuid4())
-        password_hash = generate_password_hash(data['password'])
+        password_hash = generate_password_hash(data['password']).decode('utf-8')
 
         user_data = {
             'id': user_id,
