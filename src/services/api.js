@@ -32,7 +32,7 @@ const apiCall = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
 
     // Handle 401 - try to refresh token
-    if (response.status === 401 && token) {
+    if (response.status === 401 && token && !endpoint.includes('/auth/refresh')) {
       const refreshed = await refreshAccessToken();
       if (refreshed) {
         // Retry the original request with new token
@@ -40,9 +40,8 @@ const apiCall = async (endpoint, options = {}) => {
         const retryResponse = await fetch(url, config);
         return handleResponse(retryResponse);
       } else {
-        // Refresh failed, redirect to login
+        // Refresh failed, clear tokens
         clearTokens();
-        window.location.href = '/login';
         throw new Error('Authentication required');
       }
     }
