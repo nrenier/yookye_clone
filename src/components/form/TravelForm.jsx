@@ -82,8 +82,31 @@ import {
         // Import API service
         const { travelAPI } = await import('../../services/api');
   
+        // Map frontend field names to backend field names
+        const backendFormData = {
+          passions: formData.passions,
+          specific_places: formData.specificPlaces,
+          places_to_visit: formData.placesToVisit,
+          preferred_destinations: formData.preferredDestinations,
+          travel_pace: formData.travelPace,
+          accommodation_level: formData.accommodationLevel,
+          accommodation_type: formData.accommodationType,
+          adults: formData.adults,
+          children: formData.children,
+          infants: formData.infants,
+          rooms: formData.rooms,
+          traveler_type: formData.travelerType,
+          check_in: formData.checkIn,
+          check_out: formData.checkOut,
+          transportation_known: formData.transportationKnown,
+          arrival_departure: formData.arrivalDeparture,
+          budget: formData.budget,
+          special_services: formData.specialServices,
+          email: formData.email,
+        };
+
         // Submit form to backend
-        const response = await travelAPI.submitForm(formData);
+        const response = await travelAPI.submitForm(backendFormData);
   
         // Show success message
         alert(`Richiesta inviata con successo! ${response.next_steps}`);
