@@ -44,7 +44,7 @@ def register():
 
         # Create new user
         user_id = str(uuid.uuid4())
-        password_hash = generate_password_hash(data['password']).decode('utf-8')
+        password_hash = generate_password_hash(data['password'])
 
         user_data = {
             'id': user_id,
@@ -102,7 +102,14 @@ def login():
         user_data = user_doc['_source']
 
         # Check password
-        if not check_password_hash(user_data['password'], data['password']):
+        stored_hash = user_data['password']
+        provided_password = data['password']
+        
+        # Debug logging (remove in production)
+        print(f"Stored hash type: {type(stored_hash)}")
+        print(f"Provided password: {provided_password}")
+        
+        if not check_password_hash(stored_hash, provided_password):
             return jsonify({'error': 'Invalid credentials'}), 401
 
         # Create tokens
@@ -122,6 +129,8 @@ def login():
         }), 200
 
     except Exception as e:
+        print(f"Login exception: {e}")
+        print(f"Exception type: {type(e)}")
         return jsonify({'error': 'Login failed', 'details': str(e)}), 500
 
 @auth_bp.route('/refresh', methods=['POST'])
