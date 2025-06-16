@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
   Typography,
   Button,
   Box,
+  Container,
   useTheme,
   IconButton,
   Menu,
   MenuItem,
   useMediaQuery,
   Avatar,
-} from '@mui/material';
-import { Menu as MenuIcon, Person, ExitToApp } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
+} from "@mui/material";
+import { Menu as MenuIcon, Person, ExitToApp } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { authAPI } from "../../services/api";
 
 function Header({ user, setUser }) {
   const theme = useTheme();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,16 +30,16 @@ function Header({ user, setUser }) {
   }, []);
 
   const checkAuthStatus = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const response = await authAPI.getProfile();
         setUser(response.user);
         setIsLoggedIn(true);
       } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        console.error("Auth check failed:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
         setIsLoggedIn(false);
         setUser(null);
       }
@@ -66,18 +67,18 @@ function Header({ user, setUser }) {
       await authAPI.logout();
       setIsLoggedIn(false);
       setUser(null);
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       handleUserMenuClose();
     }
   };
 
   const menuItems = [
-    { label: 'Come funziona', path: '/come-funziona' },
-    { label: 'Destinazioni', path: '/destinazioni' },
-    { label: 'Contatti', path: '/contatti' },
+    { label: "Come funziona", path: "/come-funziona" },
+    { label: "Destinazioni", path: "/destinazioni" },
+    { label: "Contatti", path: "/contatti" },
   ];
 
   return (
@@ -85,7 +86,7 @@ function Header({ user, setUser }) {
       position="static"
       sx={{
         backgroundColor: theme.palette.primary.main,
-        boxShadow: 'none',
+        boxShadow: "none",
       }}
     >
       <Container maxWidth="lg">
@@ -95,11 +96,11 @@ function Header({ user, setUser }) {
             sx={{
               flexGrow: 1,
               fontWeight: 700,
-              fontSize: '2rem',
-              color: 'white',
-              cursor: 'pointer',
+              fontSize: "2rem",
+              color: "white",
+              cursor: "pointer",
             }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
           >
             yookye
           </Typography>
@@ -119,38 +120,35 @@ function Header({ user, setUser }) {
 
           {/* Desktop Navigation */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+            <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
               <Button
                 color="inherit"
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 sx={{ fontWeight: 500 }}
               >
                 Home
               </Button>
               <Button
                 color="inherit"
-                onClick={() => navigate('/form')}
+                onClick={() => navigate("/form")}
                 sx={{ fontWeight: 500 }}
               >
                 Crea Viaggio
               </Button>
 
               {isLoggedIn ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconButton
-                    onClick={handleUserMenuOpen}
-                    sx={{ p: 0 }}
-                  >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <IconButton onClick={handleUserMenuOpen} sx={{ p: 0 }}>
                     <Avatar
                       sx={{
                         width: 32,
                         height: 32,
-                        bgcolor: 'white',
+                        bgcolor: "white",
                         color: theme.palette.primary.main,
-                        fontSize: '0.9rem',
+                        fontSize: "0.9rem",
                       }}
                     >
-                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      {user?.name?.charAt(0)?.toUpperCase() || "U"}
                     </Avatar>
                   </IconButton>
                   <Menu
@@ -158,15 +156,20 @@ function Header({ user, setUser }) {
                     open={Boolean(userMenuAnchor)}
                     onClose={handleUserMenuClose}
                     anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
+                      vertical: "bottom",
+                      horizontal: "right",
                     }}
                     transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
+                      vertical: "top",
+                      horizontal: "right",
                     }}
                   >
-                    <MenuItem onClick={() => { navigate('/profile'); handleUserMenuClose(); }}>
+                    <MenuItem
+                      onClick={() => {
+                        navigate("/profile");
+                        handleUserMenuClose();
+                      }}
+                    >
                       <Person sx={{ mr: 2 }} />
                       Il mio profilo
                     </MenuItem>
@@ -179,14 +182,14 @@ function Header({ user, setUser }) {
               ) : (
                 <Button
                   variant="outlined"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate("/login")}
                   sx={{
-                    color: 'white',
-                    borderColor: 'white',
+                    color: "white",
+                    borderColor: "white",
                     fontWeight: 500,
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    "&:hover": {
+                      borderColor: "white",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
                     },
                   }}
                 >
@@ -202,33 +205,60 @@ function Header({ user, setUser }) {
             open={Boolean(mobileMenuAnchor)}
             onClose={handleMobileMenuClose}
             anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
+              vertical: "bottom",
+              horizontal: "left",
             }}
             transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
+              vertical: "top",
+              horizontal: "left",
             }}
           >
-            <MenuItem onClick={() => { navigate('/'); handleMobileMenuClose(); }}>
+            <MenuItem
+              onClick={() => {
+                navigate("/");
+                handleMobileMenuClose();
+              }}
+            >
               Home
             </MenuItem>
-            <MenuItem onClick={() => { navigate('/form'); handleMobileMenuClose(); }}>
+            <MenuItem
+              onClick={() => {
+                navigate("/form");
+                handleMobileMenuClose();
+              }}
+            >
               Crea Viaggio
             </MenuItem>
             {isLoggedIn ? (
               [
-                <MenuItem key="profile" onClick={() => { navigate('/profile'); handleMobileMenuClose(); }}>
+                <MenuItem
+                  key="profile"
+                  onClick={() => {
+                    navigate("/profile");
+                    handleMobileMenuClose();
+                  }}
+                >
                   <Person sx={{ mr: 2 }} />
                   Il mio profilo
                 </MenuItem>,
-                <MenuItem key="logout" onClick={() => { handleLogout(); handleMobileMenuClose(); }}>
+                <MenuItem
+                  key="logout"
+                  onClick={() => {
+                    handleLogout();
+                    handleMobileMenuClose();
+                  }}
+                >
                   <ExitToApp sx={{ mr: 2 }} />
                   Logout
-                </MenuItem>
+                </MenuItem>,
               ]
             ) : (
-              <MenuItem onClick={() => { navigate('/login'); handleMobileMenuClose(); }}>
+              <MenuItem
+                onClick={() => {
+                  navigate("/login");
+                  handleMobileMenuClose();
+                }}
+              >
                 Accedi
               </MenuItem>
             )}
