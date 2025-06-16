@@ -106,8 +106,6 @@ def login():
                 size=1
             )
 
-        print(f"Search result: {search_result}")
-        print(f"Total hits: {search_result['hits']['total']['value']}")
 
         if search_result['hits']['total']['value'] == 0:
             print("User not found!")
@@ -117,36 +115,15 @@ def login():
         user_id = user_doc['_id']
         user_data = user_doc['_source']
 
-        print(f"User found: {user_data}")
-
         # Check password
         stored_hash = user_data['password']
         provided_password = data['password']
         
-        # Debug logging (remove in production)
-        print(f"=== PASSWORD CHECK ===")
-        print(f"Email found: {user_data['email']}")
-        print(f"Stored hash: {stored_hash}")
-        print(f"Stored hash type: {type(stored_hash)}")
-        print(f"Provided password: {provided_password}")
-        print(f"Hash starts with $2b$: {stored_hash.startswith('$2b$')}")
         
         # Try password verification
         password_valid = check_password_hash(stored_hash, provided_password)
         print(f"Password verification result: {password_valid}")
         
-        if not password_valid:
-            # Try manual bcrypt check as fallback
-            try:
-                import bcrypt
-                manual_check = bcrypt.checkpw(provided_password.encode('utf-8'), stored_hash.encode('utf-8'))
-                print(f"Manual bcrypt check result: {manual_check}")
-                if not manual_check:
-                    print("Both password checks failed!")
-                    return jsonify({'error': 'Invalid credentials'}), 401
-            except Exception as bcrypt_error:
-                print(f"Manual bcrypt check failed: {bcrypt_error}")
-                return jsonify({'error': 'Invalid credentials'}), 401
 
         # Create tokens
         access_token = create_access_token(identity=user_id)
