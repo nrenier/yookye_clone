@@ -16,13 +16,12 @@ import { Menu as MenuIcon, Person, ExitToApp } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
 
-function Header() {
+function Header({ user, setUser }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
-  const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {

@@ -12,8 +12,8 @@ import {
   import { useState } from 'react';
   import { useNavigate } from 'react-router-dom';
   import { authAPI } from '../../services/api';
-  
-  function LoginForm() {
+
+  function LoginForm({ setUser }) {
     const theme = useTheme();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ import {
       email: '',
       password: '',
     });
-  
+
     const handleChange = (e) => {
       setFormData(prev => ({
         ...prev,
@@ -30,27 +30,31 @@ import {
       }));
       if (error) setError(''); // Clear error on input change
     };
-  
+
     const handleSubmit = async (e) => {
       e.preventDefault();
-  
+
       if (!formData.email || !formData.password) {
         setError('Inserisci email e password');
         return;
       }
-  
+
       try {
         setLoading(true);
         setError('');
-  
+
         const response = await authAPI.login({
           email: formData.email,
           password: formData.password,
         });
-  
-        // Login successful, redirect to home
-        navigate('/');
-  
+
+        if (response.access_token) {
+          // Set user state
+          setUser(response.user);
+          // Redirect to home page or dashboard
+          window.location.href = '/';
+        }
+
       } catch (error) {
         console.error('Login error:', error);
         setError(error.message || 'Errore durante il login');
@@ -58,11 +62,11 @@ import {
         setLoading(false);
       }
     };
-  
+
     const handleRegisterRedirect = () => {
       navigate('/register');
     };
-  
+
     return (
       <Box sx={{ py: 8, backgroundColor: '#f9f8fb', minHeight: '100vh' }}>
         <Container maxWidth="sm">
@@ -86,7 +90,7 @@ import {
             >
               Accedi a Yookye
             </Typography>
-  
+
             <Typography
               variant="body1"
               sx={{
@@ -97,13 +101,13 @@ import {
             >
               Accedi al tuo account per gestire i tuoi viaggi
             </Typography>
-  
+
             {error && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
               </Alert>
             )}
-  
+
             <form onSubmit={handleSubmit}>
               <Box sx={{ mb: 3 }}>
                 <TextField
@@ -118,7 +122,7 @@ import {
                   disabled={loading}
                 />
               </Box>
-  
+
               <Box sx={{ mb: 4 }}>
                 <TextField
                   fullWidth
@@ -132,7 +136,7 @@ import {
                   disabled={loading}
                 />
               </Box>
-  
+
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Button
                   type="submit"
@@ -166,7 +170,7 @@ import {
                 </Button>
               </Box>
             </form>
-  
+
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 Non hai ancora un account?{' '}
@@ -193,6 +197,5 @@ import {
       </Box>
     );
   }
-  
+
   export default LoginForm;
-  

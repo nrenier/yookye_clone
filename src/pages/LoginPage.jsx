@@ -3,11 +3,11 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import LoginForm from '../components/auth/LoginForm';
 
-function LoginPage() {
+const LoginPage = ({ setUser }) => {
   return (
     <Box>
       <Header />
-      <LoginForm />
+      <LoginForm setUser={setUser}/>
       <Footer />
     </Box>
   );

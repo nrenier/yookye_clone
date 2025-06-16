@@ -124,6 +124,9 @@ def login():
         password_valid = check_password_hash(stored_hash, provided_password)
         print(f"Password verification result: {password_valid}")
         
+        if not password_valid:
+            print("Password verification failed!")
+            return jsonify({'error': 'Invalid credentials'}), 401
 
         # Create tokens
         access_token = create_access_token(identity=user_id)

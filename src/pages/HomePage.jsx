@@ -1,4 +1,3 @@
-
 import { Box } from '@mui/material';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -8,10 +7,10 @@ import HowItWorks from '../components/home/HowItWorks';
 import Destinations from '../components/home/Destinations';
 import WhyYookye from '../components/home/WhyYookye';
 
-function HomePage() {
+const HomePage = ({ user, setUser }) => {
   return (
     <Box>
-      <Header />
+      <Header user={user} setUser={setUser} />
       <Hero />
       <Categories />
       <HowItWorks />
