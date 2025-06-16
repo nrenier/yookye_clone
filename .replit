@@ -10,3 +10,14 @@ run = ["sh", "-c", "npm run dev"]
 [[ports]]
 localPort = 5173
 externalPort = 80
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Start Backend"
+author = 43040872
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python app.py"
