@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -81,7 +80,7 @@ function ProfilePage() {
     try {
       setError('');
       setSuccess('');
-      
+
       const updateData = {
         name: formData.name,
         username: formData.username,
@@ -368,7 +367,32 @@ function ProfilePage() {
                 <Divider sx={{ my: 2 }} />
                 <ListItem disablePadding>
                   <ListItemButton
-                    onClick={() => setLogoutDialog(true)}
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('http://localhost:3001/api/auth/session-debug', {
+                          headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                          }
+                        });
+                        const debugData = await response.json();
+                        console.log("Session debug data:", debugData);
+                        alert(`Session Debug:\n${JSON.stringify(debugData, null, 2)}`);
+                      } catch (error) {
+                        console.error("Session debug error:", error);
+                        alert(`Session debug failed: ${error.message}`);
+                      }
+                    }}
+                    sx={{ borderRadius: 1 }}
+                  >
+                    <ListItemIcon>
+                      <Settings />
+                    </ListItemIcon>
+                    <ListItemText primary="Debug Sessione" />
+                  </ListItemButton>
+
+                  <ListItemButton
+                    onClick={handleLogout}
                     sx={{
                       borderRadius: 1,
                       color: 'error.main',

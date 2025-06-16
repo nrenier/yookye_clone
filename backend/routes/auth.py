@@ -89,14 +89,14 @@ def login():
     try:
         print(f"=== LOGIN ATTEMPT ===")
         print(f"Email provided: {data['email']}")
-        
+
         # Find user - try exact term search first
         search_result = opensearch_ops.search_documents(
             'users',
             query={'term': {'email': data['email']}},
             size=1
         )
-        
+
         # If not found, try with match query (case insensitive)
         if search_result['hits']['total']['value'] == 0:
             print("Trying case-insensitive search...")
@@ -118,12 +118,12 @@ def login():
         # Check password
         stored_hash = user_data['password']
         provided_password = data['password']
-        
-        
+
+
         # Try password verification
         password_valid = check_password_hash(stored_hash, provided_password)
         print(f"Password verification result: {password_valid}")
-        
+
         if not password_valid:
             print("Password verification failed!")
             return jsonify({'error': 'Invalid credentials'}), 401
@@ -131,7 +131,7 @@ def login():
         # Create tokens with custom claims
         access_jti = str(uuid.uuid4())
         refresh_jti = str(uuid.uuid4())
-        
+
         access_token = create_access_token(
             identity=user_id,
             additional_claims={'jti': access_jti}
@@ -203,7 +203,7 @@ def get_profile():
     try:
         current_user_id = get_jwt_identity()
         jwt_claims = get_jwt()
-        
+
         # Validate session is still active
         if 'jti' in jwt_claims:
             access_jti = jwt_claims['jti']
@@ -219,10 +219,10 @@ def get_profile():
                 },
                 size=1
             )
-            
+
             if session_search['hits']['total']['value'] == 0:
                 return jsonify({'error': 'Session expired or invalid'}), 401
-                
+
             # Update last activity
             session_doc = session_search['hits']['hits'][0]
             session_id = session_doc['_id']
@@ -284,34 +284,114 @@ def update_profile():
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    """Logout user and invalidate session"""
+    """Logout user and revoke session"""
     try:
-        jwt_claims = get_jwt()
-        
-        if 'jti' in jwt_claims:
-            access_jti = jwt_claims['jti']
-            
-            # Find and deactivate session
-            session_search = opensearch_ops.search_documents(
-                'sessions',
-                query={'term': {'access_token_jti': access_jti}},
-                size=1
-            )
-            
-            if session_search['hits']['total']['value'] > 0:
-                session_doc = session_search['hits']['hits'][0]
-                session_id = session_doc['_id']
-                
-                # Mark session as inactive
-                opensearch_ops.update_document('sessions', session_id, {
-                    'is_active': False,
-                    'logged_out_at': datetime.utcnow().isoformat()
-                })
+        current_user_id = get_jwt_identity()
+        jti = get_jwt()['jti']  # JWT Token Identifier
 
-        return jsonify({'message': 'Logout successful'}), 200
-        
+        print(f"=== LOGOUT ATTEMPT ===")
+        print(f"User ID: {current_user_id}")
+        print(f"JWT ID: {jti}")
+
+        # Add token to blacklist in OpenSearch
+        opensearch_ops.create_document('blacklisted_tokens', jti, {
+            'jti': jti,
+            'user_id': current_user_id,
+            'blacklisted_at': datetime.utcnow().isoformat()
+        })
+
+        # Deactivate user session
+        session_query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"user_id": current_user_id}},
+                        {"term": {"is_active": True}}
+                    ]
+                }
+            }
+        }
+
+        sessions_response = opensearch_ops.search_documents('sessions', session_query)
+        print(f"Active sessions found: {len(sessions_response['hits']['hits'])}")
+
+        for hit in sessions_response['hits']['hits']:
+            session_id = hit['_id']
+            print(f"Deactivating session: {session_id}")
+            opensearch_ops.update_document('sessions', session_id, {
+                'is_active': False,
+                'logout_at': datetime.utcnow().isoformat()
+            })
+
+        print("Logout completed successfully")
+        return jsonify({'message': 'Logged out successfully'}), 200
+
     except Exception as e:
+        print(f"Logout error: {str(e)}")
         return jsonify({'error': 'Logout failed', 'details': str(e)}), 500
+
+@auth_bp.route('/session-debug', methods=['GET'])
+@jwt_required()
+def session_debug():
+    """Debug endpoint to check session status"""
+    try:
+        current_user_id = get_jwt_identity()
+        jti = get_jwt()['jti']
+
+        print(f"=== SESSION DEBUG ===")
+        print(f"User ID: {current_user_id}")
+        print(f"JWT ID: {jti}")
+
+        # Check if token is blacklisted
+        try:
+            blacklist_doc = opensearch_ops.get_document('blacklisted_tokens', jti)
+            token_blacklisted = True
+            print("Token is blacklisted")
+        except:
+            token_blacklisted = False
+            print("Token is not blacklisted")
+
+        # Get user sessions
+        session_query = {
+            "query": {
+                "term": {"user_id": current_user_id}
+            },
+            "sort": [{"created_at": {"order": "desc"}}]
+        }
+
+        sessions_response = opensearch_ops.search_documents('sessions', session_query)
+        sessions = []
+
+        for hit in sessions_response['hits']['hits']:
+            session_data = hit['_source']
+            session_data['session_id'] = hit['_id']
+            sessions.append(session_data)
+            print(f"Session {hit['_id']}: active={session_data.get('is_active', False)}")
+
+        # Get user info
+        user_doc = opensearch_ops.get_document('users', current_user_id)
+        user_info = user_doc['_source']
+
+        debug_info = {
+            'user_id': current_user_id,
+            'jti': jti,
+            'token_blacklisted': token_blacklisted,
+            'user_info': {
+                'email': user_info.get('email'),
+                'name': user_info.get('name'),
+                'created_at': user_info.get('created_at')
+            },
+            'sessions': sessions,
+            'total_sessions': len(sessions),
+            'active_sessions': len([s for s in sessions if s.get('is_active', False)])
+        }
+
+        print(f"Debug info compiled: {debug_info}")
+        return jsonify(debug_info), 200
+
+    except Exception as e:
+        print(f"Session debug error: {str(e)}")
+        return jsonify({'error': 'Session debug failed', 'details': str(e)}), 500
 
 @auth_bp.route('/sessions', methods=['GET'])
 @jwt_required()
@@ -319,7 +399,7 @@ def get_active_sessions():
     """Get user's active sessions"""
     try:
         current_user_id = get_jwt_identity()
-        
+
         # Get all active sessions for user
         sessions_result = opensearch_ops.search_documents(
             'sessions',
@@ -360,7 +440,7 @@ def revoke_session():
     try:
         current_user_id = get_jwt_identity()
         session_id = request.view_args['session_id']
-        
+
         # Verify session belongs to current user
         session_doc = opensearch_ops.get_document('sessions', session_id)
         if session_doc['_source']['user_id'] != current_user_id:

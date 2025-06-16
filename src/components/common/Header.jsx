@@ -13,7 +13,7 @@ import {
   useMediaQuery,
   Avatar,
 } from "@mui/material";
-import { Menu as MenuIcon, Person, ExitToApp } from "@mui/icons-material";
+import { Menu as MenuIcon, Person, ExitToApp, Settings } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../../services/api";
 
@@ -64,14 +64,50 @@ function Header({ user, setUser }) {
 
   const handleLogout = async () => {
     try {
+      console.log("=== LOGOUT PROCESS STARTED ===");
+      console.log("Current user:", user);
+      console.log("Token exists:", !!localStorage.getItem("access_token"));
+      
       await authAPI.logout();
+      
+      // Clear all auth data
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      
       setIsLoggedIn(false);
       setUser(null);
+      
+      console.log("Logout completed, redirecting to home");
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
+      // Force logout even if API call fails
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      setIsLoggedIn(false);
+      setUser(null);
+      navigate("/");
     } finally {
       handleUserMenuClose();
+    }
+  };
+
+  const handleSessionDebug = async () => {
+    try {
+      console.log("=== SESSION DEBUG ===");
+      const response = await fetch('http://localhost:3001/api/auth/session-debug', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const debugData = await response.json();
+      console.log("Session debug data:", debugData);
+      alert(`Session Debug:\n${JSON.stringify(debugData, null, 2)}`);
+    } catch (error) {
+      console.error("Session debug error:", error);
+      alert(`Session debug failed: ${error.message}`);
     }
   };
 
@@ -173,6 +209,10 @@ function Header({ user, setUser }) {
                       <Person sx={{ mr: 2 }} />
                       Il mio profilo
                     </MenuItem>
+                    <MenuItem onClick={() => { handleSessionDebug(); handleUserMenuClose(); }}>
+                      <Settings sx={{ mr: 2 }} />
+                      Debug Sessione
+                    </MenuItem>
                     <MenuItem onClick={handleLogout}>
                       <ExitToApp sx={{ mr: 2 }} />
                       Logout
@@ -240,6 +280,16 @@ function Header({ user, setUser }) {
                 >
                   <Person sx={{ mr: 2 }} />
                   Il mio profilo
+                </MenuItem>,
+                <MenuItem
+                  key="debug"
+                  onClick={() => {
+                    handleSessionDebug();
+                    handleMobileMenuClose();
+                  }}
+                >
+                  <Settings sx={{ mr: 2 }} />
+                  Debug Sessione
                 </MenuItem>,
                 <MenuItem
                   key="logout"
