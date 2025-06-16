@@ -5,6 +5,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import urllib3
 import ssl
+import os
+import uuid
 
 from config.opensearch_client import opensearch_ops
 
@@ -20,6 +22,11 @@ def authenticate_external_api():
         api_url = os.getenv('TRAVEL_API_URL')
         api_username = os.getenv('TRAVEL_API_USERNAME')
         api_password = os.getenv('TRAVEL_API_PASSWORD')
+
+        print(f"[DEBUG] External API Configuration:")
+        print(f"[DEBUG] API URL: {api_url}")
+        print(f"[DEBUG] API Username: {api_username}")
+        print(f"[DEBUG] API Password: {'*' * len(api_password) if api_password else 'None'}")
 
         if not all([api_url, api_username, api_password]):
             raise Exception("External API configuration is missing")
@@ -37,6 +44,13 @@ def authenticate_external_api():
         # In production, you should use proper SSL certificates
         verify_ssl = not api_url.startswith('https://localhost')
 
+        print(f"[DEBUG] Making authentication request to: {auth_url}")
+        print(f"[DEBUG] Request method: POST")
+        print(f"[DEBUG] Request headers: {{'Content-Type': 'application/x-www-form-urlencoded'}}")
+        print(f"[DEBUG] Request data: {{'username': '{api_username}', 'password': '***'}}")
+        print(f"[DEBUG] SSL verification: {verify_ssl}")
+        print(f"[DEBUG] Timeout: 10 seconds")
+
         response = requests.post(
             auth_url,
             data=auth_data,  # OAuth2PasswordRequestForm expects form data
@@ -45,18 +59,40 @@ def authenticate_external_api():
             verify=verify_ssl
         )
 
+        print(f"[DEBUG] Response received:")
+        print(f"[DEBUG] Status code: {response.status_code}")
+        print(f"[DEBUG] Response headers: {dict(response.headers)}")
+        print(f"[DEBUG] Response content: {response.text}")
+
         if response.status_code == 401:
+            print(f"[DEBUG] Authentication failed: Invalid credentials")
             raise Exception("Invalid credentials for external API")
 
         if not response.ok:
+            print(f"[DEBUG] Authentication failed: HTTP {response.status_code}")
             raise Exception(f"External API authentication failed: {response.status_code}")
 
-        token_data = response.json()
-        return token_data.get('access_token')
+        try:
+            token_data = response.json()
+            print(f"[DEBUG] Token data received: {token_data}")
+            access_token = token_data.get('access_token')
+            print(f"[DEBUG] Access token extracted: {'***' + access_token[-10:] if access_token else 'None'}")
+            return access_token
+        except ValueError as e:
+            print(f"[DEBUG] Failed to parse JSON response: {str(e)}")
+            raise Exception(f"Invalid JSON response from external API: {str(e)}")
 
+    except requests.exceptions.ConnectTimeout:
+        print(f"[DEBUG] Connection timeout to {auth_url}")
+        raise Exception(f"Connection timeout to external API: {auth_url}")
+    except requests.exceptions.ConnectionError as e:
+        print(f"[DEBUG] Connection error: {str(e)}")
+        raise Exception(f"Failed to connect to external API: {str(e)}")
     except requests.exceptions.RequestException as e:
+        print(f"[DEBUG] Request exception: {str(e)}")
         raise Exception(f"Failed to connect to external API: {str(e)}")
     except Exception as e:
+        print(f"[DEBUG] Unexpected error: {str(e)}")
         raise Exception(f"External API authentication error: {str(e)}")
 
 # Validation schema for travel form
@@ -93,11 +129,12 @@ def submit_travel_form():
 
     try:
         # Authenticate with external travel API
+        print(f"[DEBUG] Starting external API authentication process...")
         try:
             external_token = authenticate_external_api()
-            print(f"Successfully authenticated with external API, token received")
+            print(f"[DEBUG] Successfully authenticated with external API, token received: {'***' + external_token[-10:] if external_token else 'None'}")
         except Exception as e:
-            print(f"External API authentication failed: {str(e)}")
+            print(f"[DEBUG] External API authentication failed: {str(e)}")
             return jsonify({
                 'error': 'External service authentication failed', 
                 'details': str(e)
