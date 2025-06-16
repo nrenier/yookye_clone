@@ -87,26 +87,44 @@ def login():
         return jsonify({'error': 'Validation error', 'details': err.messages}), 400
 
     try:
-        # Find user
+        print(f"=== LOGIN ATTEMPT ===")
+        print(f"Email provided: {data['email']}")
+        
+        # Find user - try exact term search first
         search_result = opensearch_ops.search_documents(
             'users',
             query={'term': {'email': data['email']}},
             size=1
         )
+        
+        # If not found, try with match query (case insensitive)
+        if search_result['hits']['total']['value'] == 0:
+            print("Trying case-insensitive search...")
+            search_result = opensearch_ops.search_documents(
+                'users',
+                query={'match': {'email': data['email']}},
+                size=1
+            )
+
+        print(f"Search result: {search_result}")
+        print(f"Total hits: {search_result['hits']['total']['value']}")
 
         if search_result['hits']['total']['value'] == 0:
+            print("User not found!")
             return jsonify({'error': 'Invalid credentials'}), 401
 
         user_doc = search_result['hits']['hits'][0]
         user_id = user_doc['_id']
         user_data = user_doc['_source']
 
+        print(f"User found: {user_data}")
+
         # Check password
         stored_hash = user_data['password']
         provided_password = data['password']
         
         # Debug logging (remove in production)
-        print(f"=== LOGIN DEBUG ===")
+        print(f"=== PASSWORD CHECK ===")
         print(f"Email found: {user_data['email']}")
         print(f"Stored hash: {stored_hash}")
         print(f"Stored hash type: {type(stored_hash)}")
@@ -124,6 +142,7 @@ def login():
                 manual_check = bcrypt.checkpw(provided_password.encode('utf-8'), stored_hash.encode('utf-8'))
                 print(f"Manual bcrypt check result: {manual_check}")
                 if not manual_check:
+                    print("Both password checks failed!")
                     return jsonify({'error': 'Invalid credentials'}), 401
             except Exception as bcrypt_error:
                 print(f"Manual bcrypt check failed: {bcrypt_error}")
