@@ -428,6 +428,98 @@ import {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* Period */}
+              <Box sx={{ mb: 4 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: '1.2rem',
+                    fontWeight: 600,
+                    color: theme.palette.secondary.main,
+                    mb: 3,
+                  }}
+                >
+                  Periodo:
+                </Typography>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Check-in"
+                      value={formData.checkIn}
+                      onChange={(e) => setFormData(prev => ({ ...prev, checkIn: e.target.value }))}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Check-out"
+                      value={formData.checkOut}
+                      onChange={(e) => setFormData(prev => ({ ...prev, checkOut: e.target.value }))}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+
+              {/* Transportation */}
+              <Box sx={{ mb: 4 }}>
+                <FormControl component="fieldset">
+                  <FormLabel
+                    sx={{
+                      fontSize: '1.2rem',
+                      fontWeight: 600,
+                      color: theme.palette.secondary.main,
+                      mb: 2,
+                    }}
+                  >
+                    Conosci già le località di arrivo e partenza per questo viaggio?
+                  </FormLabel>
+                  <RadioGroup
+                    value={formData.transportationKnown}
+                    onChange={(e) => setFormData(prev => ({ ...prev, transportationKnown: e.target.value }))}
+                  >
+                    <FormControlLabel
+                      value="no"
+                      control={<Radio />}
+                      label="Non so ancora"
+                    />
+                    <FormControlLabel
+                      value="car"
+                      control={<Radio />}
+                      label="Userò la mia auto"
+                    />
+                    <FormControlLabel
+                      value="yes"
+                      control={<Radio />}
+                      label="Sì, conosco già le località di arrivo e partenza (volo/treno)"
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </Box>
+
+              {formData.transportationKnown === 'yes' && (
+                <Box sx={{ mb: 4 }}>
+                  <TextField
+                    fullWidth
+                    label="Località di arrivo e partenza"
+                    multiline
+                    rows={2}
+                    value={formData.arrivalDeparture}
+                    onChange={(e) => setFormData(prev => ({ ...prev, arrivalDeparture: e.target.value }))}
+                    placeholder="Specifica le località di arrivo e partenza..."
+                  />
+                </Box>
+              )}</Box>
   
               {/* Budget */}
               <Box sx={{ mb: 4 }}>
