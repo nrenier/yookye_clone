@@ -60,12 +60,11 @@ def create_indices():
         'users': {
             'mappings': {
                 'properties': {
+                    'id': {'type': 'keyword'},
                     'email': {'type': 'keyword'},
-                    'password_hash': {'type': 'keyword'},
-                    'first_name': {'type': 'text'},
-                    'last_name': {'type': 'text'},
-                    'created_at': {'type': 'date'},
-                    'last_login': {'type': 'date'}
+                    'password': {'type': 'keyword'},
+                    'name': {'type': 'text'},
+                    'username': {'type': 'keyword'}
                 }
             }
         },

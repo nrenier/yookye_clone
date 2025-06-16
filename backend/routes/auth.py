@@ -14,8 +14,8 @@ auth_bp = Blueprint('auth', __name__)
 class RegisterSchema(Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True, validate=lambda x: len(x) >= 6)
-    first_name = fields.Str(required=True, validate=lambda x: len(x.strip()) > 0)
-    last_name = fields.Str(required=True, validate=lambda x: len(x.strip()) > 0)
+    name = fields.Str(required=True, validate=lambda x: len(x.strip()) > 0)
+    username = fields.Str(required=True, validate=lambda x: len(x.strip()) > 0)
 
 class LoginSchema(Schema):
     email = fields.Email(required=True)
@@ -47,12 +47,11 @@ def register():
         password_hash = generate_password_hash(data['password']).decode('utf-8')
 
         user_data = {
+            'id': user_id,
             'email': data['email'],
-            'password_hash': password_hash,
-            'first_name': data['first_name'],
-            'last_name': data['last_name'],
-            'created_at': datetime.utcnow().isoformat(),
-            'last_login': None
+            'password': password_hash,
+            'name': data['name'],
+            'username': data['username']
         }
 
         # Store user in OpenSearch
@@ -67,8 +66,8 @@ def register():
             'user': {
                 'id': user_id,
                 'email': data['email'],
-                'first_name': data['first_name'],
-                'last_name': data['last_name']
+                'name': data['name'],
+                'username': data['username']
             },
             'access_token': access_token,
             'refresh_token': refresh_token
@@ -103,13 +102,8 @@ def login():
         user_data = user_doc['_source']
 
         # Check password
-        if not check_password_hash(user_data['password_hash'], data['password']):
+        if not check_password_hash(user_data['password'], data['password']):
             return jsonify({'error': 'Invalid credentials'}), 401
-
-        # Update last login
-        opensearch_ops.update_document('users', user_id, {
-            'last_login': datetime.utcnow().isoformat()
-        })
 
         # Create tokens
         access_token = create_access_token(identity=user_id)
@@ -120,8 +114,8 @@ def login():
             'user': {
                 'id': user_id,
                 'email': user_data['email'],
-                'first_name': user_data['first_name'],
-                'last_name': user_data['last_name']
+                'name': user_data['name'],
+                'username': user_data['username']
             },
             'access_token': access_token,
             'refresh_token': refresh_token
@@ -165,10 +159,8 @@ def get_profile():
             'user': {
                 'id': current_user_id,
                 'email': user_data['email'],
-                'first_name': user_data['first_name'],
-                'last_name': user_data['last_name'],
-                'created_at': user_data['created_at'],
-                'last_login': user_data.get('last_login')
+                'name': user_data['name'],
+                'username': user_data['username']
             }
         }), 200
 
@@ -184,7 +176,7 @@ def update_profile():
         data = request.json
 
         # Validate updatable fields
-        updatable_fields = ['first_name', 'last_name']
+        updatable_fields = ['name', 'username']
         update_data = {k: v for k, v in data.items() if k in updatable_fields and v}
 
         if not update_data:
@@ -202,8 +194,8 @@ def update_profile():
             'user': {
                 'id': current_user_id,
                 'email': user_data['email'],
-                'first_name': user_data['first_name'],
-                'last_name': user_data['last_name']
+                'name': user_data['name'],
+                'username': user_data['username']
             }
         }), 200
 
