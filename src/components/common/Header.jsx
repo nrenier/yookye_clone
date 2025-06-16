@@ -16,6 +16,7 @@ import {
 import { Menu as MenuIcon, Person, ExitToApp, Settings } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../../services/api";
+import logoImage from "../../assets/logo.png";
 
 function Header({ user, setUser }) {
   const theme = useTheme();
@@ -125,19 +126,34 @@ function Header({ user, setUser }) {
     >
       <Container maxWidth="lg">
         <Toolbar sx={{ py: 1 }}>
-          <Typography
-            variant="h4"
+          <Box
             sx={{
               flexGrow: 1,
-              fontWeight: 700,
-              fontSize: "2rem",
-              color: "white",
+              display: "flex",
+              alignItems: "center",
               cursor: "pointer",
             }}
             onClick={() => navigate("/")}
           >
-            yookye
-          </Typography>
+            <img
+              src={logoImage}
+              alt="Yookye"
+              style={{
+                height: "40px",
+                marginRight: "10px",
+              }}
+            />
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                fontSize: "2rem",
+                color: "white",
+              }}
+            >
+              yookye
+            </Typography>
+          </Box>
 
           {/* Mobile Menu Button */}
           {isMobile && (

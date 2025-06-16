@@ -78,18 +78,26 @@ import {
               backgroundColor: 'white',
             }}
           >
-            <Typography
-              variant="h3"
-              sx={{
-                textAlign: 'center',
-                fontSize: { xs: '2rem', md: '2.5rem' },
-                fontWeight: 700,
-                color: theme.palette.secondary.main,
-                mb: 2,
-              }}
-            >
-              Accedi a Yookye
-            </Typography>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <img
+                src="/src/assets/logo.png"
+                alt="Yookye"
+                style={{
+                  height: "60px",
+                  marginBottom: "16px",
+                }}
+              />
+              <Typography
+                variant="h3"
+                sx={{
+                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  fontWeight: 700,
+                  color: theme.palette.primary.main,
+                }}
+              >
+                Accedi a Yookye
+              </Typography>
+            </Box>
 
             <Typography
               variant="body1"

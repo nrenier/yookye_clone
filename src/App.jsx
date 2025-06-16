@@ -14,10 +14,10 @@ import ProfilePage from './pages/ProfilePage';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2E8B57', // Sea Green
+      main: '#db213f', // Yookye Red
     },
     secondary: {
-      main: '#FF6B35', // Orange Red
+      main: '#3e3f45', // Dark Gray
     },
   },
   typography: {

@@ -6,6 +6,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import logoImage from "../../assets/logo.png";
 
 function Hero() {
   const theme = useTheme();
