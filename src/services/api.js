@@ -201,6 +201,7 @@ export const auth = {
       return null;
     }
   },
+  getProfile: authAPI.getProfile,
   logout: authAPI.logout,
 };
 
