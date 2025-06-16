@@ -23,24 +23,24 @@ function Header({ user, setUser }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Use user prop directly instead of local state
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const token = localStorage.getItem("access_token");
+    if (token && !user) {
       try {
         const response = await authAPI.getProfile();
         setUser(response.user);
-        setIsLoggedIn(true);
       } catch (error) {
         console.error("Auth check failed:", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        setIsLoggedIn(false);
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         setUser(null);
       }
     }
@@ -74,7 +74,6 @@ function Header({ user, setUser }) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       
-      setIsLoggedIn(false);
       setUser(null);
       
       console.log("Logout completed, redirecting to home");
@@ -84,7 +83,6 @@ function Header({ user, setUser }) {
       // Force logout even if API call fails
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      setIsLoggedIn(false);
       setUser(null);
       navigate("/");
     } finally {
