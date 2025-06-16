@@ -72,11 +72,11 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage user={user} onLogout={handleLogout} />} />
+          <Route path="/" element={<HomePage user={user} setUser={setUser} />} />
           <Route path="/login" element={<LoginPage setUser={setUser} />} />
           <Route path="/register" element={<RegisterPage setUser={setUser} />} />
-          <Route path="/form" element={<FormPage user={user} />} />
-          <Route path="/profile" element={<ProfilePage user={user} onLogout={handleLogout} />} />
+          <Route path="/form" element={<FormPage user={user} setUser={setUser} />} />
+          <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} />} />
         </Routes>
       </Router>
     </ThemeProvider>

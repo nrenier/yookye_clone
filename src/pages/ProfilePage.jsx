@@ -325,7 +325,7 @@ function ProfilePage() {
 
   return (
     <Box>
-      <Header />
+      <Header user={user} setUser={setUser} />
       <Container maxWidth="lg" sx={{ py: 4, minHeight: '80vh' }}>
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 4, color: theme.palette.secondary.main }}>
           Il mio account
