@@ -2,11 +2,54 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, ValidationError
 import uuid
+import os
+import requests
 from datetime import datetime
 
 from config.opensearch_client import opensearch_ops
 
 travel_bp = Blueprint('travel', __name__)
+
+def authenticate_external_api():
+    """Authenticate with external travel API and return access token"""
+    try:
+        # Get configuration from environment
+        api_url = os.getenv('TRAVEL_API_URL')
+        api_username = os.getenv('TRAVEL_API_USERNAME')
+        api_password = os.getenv('TRAVEL_API_PASSWORD')
+        
+        if not all([api_url, api_username, api_password]):
+            raise Exception("External API configuration is missing")
+        
+        # Prepare authentication data
+        auth_data = {
+            'username': api_username,
+            'password': api_password
+        }
+        
+        # Make authentication request
+        auth_url = f"{api_url}/api/auth/token"
+        
+        response = requests.post(
+            auth_url,
+            data=auth_data,  # OAuth2PasswordRequestForm expects form data
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=10
+        )
+        
+        if response.status_code == 401:
+            raise Exception("Invalid credentials for external API")
+        
+        if not response.ok:
+            raise Exception(f"External API authentication failed: {response.status_code}")
+        
+        token_data = response.json()
+        return token_data.get('access_token')
+        
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Failed to connect to external API: {str(e)}")
+    except Exception as e:
+        raise Exception(f"External API authentication error: {str(e)}")
 
 # Validation schema for travel form
 class TravelFormSchema(Schema):
@@ -41,6 +84,17 @@ def submit_travel_form():
         return jsonify({'error': 'Validation error', 'details': err.messages}), 400
 
     try:
+        # Authenticate with external travel API
+        try:
+            external_token = authenticate_external_api()
+            print(f"Successfully authenticated with external API, token received")
+        except Exception as e:
+            print(f"External API authentication failed: {str(e)}")
+            return jsonify({
+                'error': 'External service authentication failed', 
+                'details': str(e)
+            }), 503
+
         # Generate travel request ID
         travel_id = str(uuid.uuid4())
 
@@ -82,6 +136,8 @@ def submit_travel_form():
             'special_services': data.get('special_services'),
             'contact_email': data['email'],
             'status': 'submitted',
+            'external_api_authenticated': True,
+            'external_token_obtained_at': datetime.utcnow().isoformat(),
             'created_at': datetime.utcnow().isoformat(),
             'updated_at': datetime.utcnow().isoformat()
         }
@@ -98,6 +154,7 @@ def submit_travel_form():
             'message': 'Travel request submitted successfully',
             'travel_id': travel_id,
             'status': 'submitted',
+            'external_api_authenticated': True,
             'next_steps': 'Our local experts will review your request and send you personalized proposals via email within 24-48 hours.'
         }), 201
 
