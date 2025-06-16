@@ -94,6 +94,23 @@ def create_indices():
                     'updated_at': {'type': 'date'}
                 }
             }
+        },
+        'sessions': {
+            'mappings': {
+                'properties': {
+                    'session_id': {'type': 'keyword'},
+                    'user_id': {'type': 'keyword'},
+                    'access_token_jti': {'type': 'keyword'},
+                    'refresh_token_jti': {'type': 'keyword'},
+                    'created_at': {'type': 'date'},
+                    'expires_at': {'type': 'date'},
+                    'last_activity': {'type': 'date'},
+                    'ip_address': {'type': 'ip'},
+                    'user_agent': {'type': 'text'},
+                    'is_active': {'type': 'boolean'}
+                }
+            }
+        }
         }
     }
 
