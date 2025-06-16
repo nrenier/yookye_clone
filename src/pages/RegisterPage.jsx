@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Box,
@@ -10,7 +11,7 @@ import {
 import Header from "../components/common/Header";
 import Footer from "../components/common/Footer";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { authAPI } from "../services/api";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -71,14 +72,14 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register", {
+      const response = await authAPI.register({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         username: formData.username,
       });
 
-      if (response.status === 201) {
+      if (response) {
         navigate("/login");
       } else {
         setError("Registrazione fallita. Riprova.");
