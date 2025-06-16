@@ -356,8 +356,11 @@ class OpenSearchOperations:
             'result': 'deleted'
         }
 
-    def ensure_index_exists(self, index_name, mapping=None):
+    @staticmethod
+    def ensure_index_exists(index_name, mapping=None):
         """Ensure an index exists, create if it doesn't"""
+        if not opensearch_client:
+            return False
         try:
             if not opensearch_client.indices.exists(index=index_name):
                 print(f"Creating index: {index_name}")

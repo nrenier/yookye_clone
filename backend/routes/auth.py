@@ -6,7 +6,7 @@ from email_validator import validate_email, EmailNotValidError
 import uuid
 from datetime import datetime, timedelta
 
-from config.opensearch_client import opensearch_ops
+from config.opensearch_client import opensearch_ops, OpenSearchOperations
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -326,10 +326,10 @@ def logout():
         print(f"JWT ID: {jti}")
 
         # Ensure blacklisted_tokens index exists
-        opensearch_ops.ensure_index_exists('blacklisted_tokens')
+        OpenSearchOperations.ensure_index_exists('blacklisted_tokens')
         
         # Add token to blacklist in OpenSearch
-        opensearch_ops.create_document('blacklisted_tokens', jti, {
+        opensearch_ops.index_document('blacklisted_tokens', jti, {
             'jti': jti,
             'user_id': current_user_id,
             'blacklisted_at': datetime.utcnow().isoformat()
