@@ -1,0 +1,49 @@
+api.js:32 
+            
+            
+           POST http://localhost:3001/api/auth/login 401 (UNAUTHORIZED)
+apiCall @ api.js:32
+login @ api.js:111
+handleSubmit @ LoginForm.jsx:46
+callCallback2 @ chunk-H6ROQLGZ.js?v=1bf48658:3678
+invokeGuardedCallbackDev @ chunk-H6ROQLGZ.js?v=1bf48658:3703
+invokeGuardedCallback @ chunk-H6ROQLGZ.js?v=1bf48658:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-H6ROQLGZ.js?v=1bf48658:3740
+executeDispatch @ chunk-H6ROQLGZ.js?v=1bf48658:7044
+processDispatchQueueItemsInOrder @ chunk-H6ROQLGZ.js?v=1bf48658:7064
+processDispatchQueue @ chunk-H6ROQLGZ.js?v=1bf48658:7073
+dispatchEventsForPlugins @ chunk-H6ROQLGZ.js?v=1bf48658:7081
+(anonime) @ chunk-H6ROQLGZ.js?v=1bf48658:7204
+batchedUpdates$1 @ chunk-H6ROQLGZ.js?v=1bf48658:18964
+batchedUpdates @ chunk-H6ROQLGZ.js?v=1bf48658:3583
+dispatchEventForPluginEventSystem @ chunk-H6ROQLGZ.js?v=1bf48658:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-H6ROQLGZ.js?v=1bf48658:5482
+dispatchEvent @ chunk-H6ROQLGZ.js?v=1bf48658:5476
+dispatchDiscreteEvent @ chunk-H6ROQLGZ.js?v=1bf48658:5453Comprendi l'errore
+api.js:40 
+            
+            
+           POST http://localhost:3001/api/auth/login 401 (UNAUTHORIZED)
+apiCall @ api.js:40
+await in apiCall
+login @ api.js:111
+handleSubmit @ LoginForm.jsx:46
+callCallback2 @ chunk-H6ROQLGZ.js?v=1bf48658:3678
+invokeGuardedCallbackDev @ chunk-H6ROQLGZ.js?v=1bf48658:3703
+invokeGuardedCallback @ chunk-H6ROQLGZ.js?v=1bf48658:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-H6ROQLGZ.js?v=1bf48658:3740
+executeDispatch @ chunk-H6ROQLGZ.js?v=1bf48658:7044
+processDispatchQueueItemsInOrder @ chunk-H6ROQLGZ.js?v=1bf48658:7064
+processDispatchQueue @ chunk-H6ROQLGZ.js?v=1bf48658:7073
+dispatchEventsForPlugins @ chunk-H6ROQLGZ.js?v=1bf48658:7081
+(anonime) @ chunk-H6ROQLGZ.js?v=1bf48658:7204
+batchedUpdates$1 @ chunk-H6ROQLGZ.js?v=1bf48658:18964
+batchedUpdates @ chunk-H6ROQLGZ.js?v=1bf48658:3583
+dispatchEventForPluginEventSystem @ chunk-H6ROQLGZ.js?v=1bf48658:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-H6ROQLGZ.js?v=1bf48658:5482
+dispatchEvent @ chunk-H6ROQLGZ.js?v=1bf48658:5476
+dispatchDiscreteEvent @ chunk-H6ROQLGZ.js?v=1bf48658:5453Comprendi l'errore
+LoginForm.jsx:55 Login error: Error: Invalid credentials
+    at handleResponse (api.js:62:11)
+    at async Object.login (api.js:111:22)
+    at async handleSubmit (LoginForm.jsx:46:26)
