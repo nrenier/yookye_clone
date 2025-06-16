@@ -34,6 +34,7 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/form" element={<FormPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
