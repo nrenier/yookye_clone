@@ -41,13 +41,19 @@ function Header({ user, setUser }) {
       try {
         console.log('Trying to get profile...');
         const response = await authAPI.getProfile();
-        setUser(response.user);
-        console.log('Profile loaded successfully:', response.user);
+        if (typeof setUser === 'function') {
+          setUser(response.user);
+          console.log('Profile loaded successfully:', response.user);
+        } else {
+          console.warn('setUser is not a function');
+        }
       } catch (error) {
         console.error("Auth check failed:", error);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        setUser(null);
+        if (typeof setUser === 'function') {
+          setUser(null);
+        }
         console.log('Tokens cleared due to auth failure');
       }
     }
@@ -81,7 +87,9 @@ function Header({ user, setUser }) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       
-      setUser(null);
+      if (typeof setUser === 'function') {
+        setUser(null);
+      }
       
       console.log("Logout completed, redirecting to home");
       navigate("/");
@@ -90,7 +98,9 @@ function Header({ user, setUser }) {
       // Force logout even if API call fails
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      setUser(null);
+      if (typeof setUser === 'function') {
+        setUser(null);
+      }
       navigate("/");
     } finally {
       handleUserMenuClose();
