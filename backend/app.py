@@ -33,6 +33,17 @@ def create_app():
 
     # JWT Manager
     jwt = JWTManager(app)
+    
+    # JWT blacklist checker
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload['jti']
+        try:
+            from config.opensearch_client import opensearch_ops
+            opensearch_ops.get_document('blacklisted_tokens', jti)
+            return True  # Token is blacklisted
+        except:
+            return False  # Token is not blacklisted
 
     # Bcrypt for password hashing
     bcrypt = Bcrypt(app)

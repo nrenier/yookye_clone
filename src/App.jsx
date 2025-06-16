@@ -32,7 +32,11 @@ function App() {
   // Check for existing authentication on app load
   useEffect(() => {
     const checkAuth = async () => {
-      if (auth.isAuthenticated()) {
+      const token = localStorage.getItem('access_token');
+      console.log('=== AUTH CHECK ON APP LOAD ===');
+      console.log('Token exists:', !!token);
+      
+      if (token) {
         try {
           const response = await authAPI.getProfile();
           setUser(response.user);
@@ -42,7 +46,11 @@ function App() {
           // Clear invalid tokens
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
+          setUser(null);
+          console.log('Tokens cleared due to auth failure');
         }
+      } else {
+        console.log('No token found, user not authenticated');
       }
       setLoading(false);
     };

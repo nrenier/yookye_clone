@@ -33,15 +33,22 @@ function Header({ user, setUser }) {
 
   const checkAuthStatus = async () => {
     const token = localStorage.getItem("access_token");
+    console.log('=== HEADER AUTH CHECK ===');
+    console.log('Token exists:', !!token);
+    console.log('Current user:', user);
+    
     if (token && !user) {
       try {
+        console.log('Trying to get profile...');
         const response = await authAPI.getProfile();
         setUser(response.user);
+        console.log('Profile loaded successfully:', response.user);
       } catch (error) {
         console.error("Auth check failed:", error);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         setUser(null);
+        console.log('Tokens cleared due to auth failure');
       }
     }
   };

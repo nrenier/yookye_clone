@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
 from flask_bcrypt import check_password_hash, generate_password_hash
 from marshmallow import Schema, fields, ValidationError
 from email_validator import validate_email, EmailNotValidError
@@ -9,6 +9,16 @@ from datetime import datetime, timedelta
 from config.opensearch_client import opensearch_ops
 
 auth_bp = Blueprint('auth', __name__)
+
+# JWT blacklist checker
+def check_if_token_revoked(jwt_header, jwt_payload):
+    jti = jwt_payload['jti']
+    try:
+        # Check if token is in blacklist
+        opensearch_ops.get_document('blacklisted_tokens', jti)
+        return True  # Token is blacklisted
+    except:
+        return False  # Token is not blacklisted
 
 # Validation schemas
 class RegisterSchema(Schema):
@@ -204,15 +214,28 @@ def get_profile():
         current_user_id = get_jwt_identity()
         jwt_claims = get_jwt()
 
+        print(f"=== PROFILE REQUEST ===")
+        print(f"User ID: {current_user_id}")
+        print(f"JWT Claims: {jwt_claims}")
+
+        # Check if token is blacklisted
+        jti = jwt_claims.get('jti')
+        if jti:
+            try:
+                blacklist_doc = opensearch_ops.get_document('blacklisted_tokens', jti)
+                print(f"Token {jti} is blacklisted!")
+                return jsonify({'error': 'Invalid token'}), 401
+            except:
+                print(f"Token {jti} is not blacklisted")
+
         # Validate session is still active
-        if 'jti' in jwt_claims:
-            access_jti = jwt_claims['jti']
+        if jti:
             session_search = opensearch_ops.search_documents(
                 'sessions',
                 query={
                     'bool': {
                         'must': [
-                            {'term': {'access_token_jti': access_jti}},
+                            {'term': {'access_token_jti': jti}},
                             {'term': {'is_active': True}}
                         ]
                     }
@@ -220,7 +243,10 @@ def get_profile():
                 size=1
             )
 
+            print(f"Active sessions found: {session_search['hits']['total']['value']}")
+
             if session_search['hits']['total']['value'] == 0:
+                print("No active session found!")
                 return jsonify({'error': 'Session expired or invalid'}), 401
 
             # Update last activity
@@ -244,6 +270,7 @@ def get_profile():
         }), 200
 
     except Exception as e:
+        print(f"Profile error: {str(e)}")
         return jsonify({'error': 'Failed to get profile', 'details': str(e)}), 500
 
 @auth_bp.route('/profile', methods=['PUT'])
