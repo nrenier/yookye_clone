@@ -1,0 +1,22 @@
+=== LOGIN ATTEMPT ===
+Email provided: test_2@test.com
+INFO:opensearch:POST http://localhost:9200/users/_search [status:200 request:0.003s]
+Trying case-insensitive search...
+INFO:opensearch:POST http://localhost:9200/users/_search [status:200 request:0.002s]
+Password verification result: True
+INFO:opensearch:PUT http://localhost:9200/sessions/_doc/1284b4e0-85c8-45b0-907e-7b74c2e406f6?refresh=true [status:201 request:0.026s]
+INFO:werkzeug:127.0.0.1 - - [16/Jun/2025 15:30:07] "POST /api/auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [16/Jun/2025 15:30:07] "OPTIONS /api/auth/profile HTTP/1.1" 200 -
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/7331e1f8-913d-4cd7-9f19-e2cb785c32f4 [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+=== PROFILE REQUEST ===
+User ID: c8d08047-15a3-4537-9dd2-a0a25f2af69b
+JWT Claims: {'fresh': False, 'iat': 1750080607, 'jti': '7331e1f8-913d-4cd7-9f19-e2cb785c32f4', 'type': 'access', 'sub': 'c8d08047-15a3-4537-9dd2-a0a25f2af69b', 'nbf': 1750080607, 'csrf': '5f7797d5-f30a-4757-bed7-7a911952dc51', 'exp': 1750167007}
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/7331e1f8-913d-4cd7-9f19-e2cb785c32f4 [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+Token 7331e1f8-913d-4cd7-9f19-e2cb785c32f4 is not blacklisted
+INFO:opensearch:POST http://localhost:9200/sessions/_search [status:200 request:0.002s]
+Active sessions found: 1
+INFO:opensearch:POST http://localhost:9200/sessions/_update/1284b4e0-85c8-45b0-907e-7b74c2e406f6?refresh=true [status:200 request:0.046s]
+INFO:opensearch:GET http://localhost:9200/users/_doc/c8d08047-15a3-4537-9dd2-a0a25f2af69b [status:200 request:0.001s]
+INFO:werkzeug:127.0.0.1 - - [16/Jun/2025 15:30:07] "GET /api/auth/profile HTTP/1.1" 200 -

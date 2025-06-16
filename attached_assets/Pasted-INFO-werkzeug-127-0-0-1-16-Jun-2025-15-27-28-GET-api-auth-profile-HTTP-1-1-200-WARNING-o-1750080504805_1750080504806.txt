@@ -1,0 +1,23 @@
+INFO:werkzeug:127.0.0.1 - - [16/Jun/2025 15:27:28] "GET /api/auth/profile HTTP/1.1" 200 -
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/b24ebe4f-025e-47c7-8a8f-60b0577fafab [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+=== PROFILE REQUEST ===
+User ID: c8d08047-15a3-4537-9dd2-a0a25f2af69b
+JWT Claims: {'fresh': False, 'iat': 1750080448, 'jti': 'b24ebe4f-025e-47c7-8a8f-60b0577fafab', 'type': 'access', 'sub': 'c8d08047-15a3-4537-9dd2-a0a25f2af69b', 'nbf': 1750080448, 'csrf': '51a4bf1b-dcb2-4f2e-a1ff-90e153922fe1', 'exp': 1750166848}
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/b24ebe4f-025e-47c7-8a8f-60b0577fafab [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+Token b24ebe4f-025e-47c7-8a8f-60b0577fafab is not blacklisted
+INFO:opensearch:POST http://localhost:9200/sessions/_search [status:200 request:0.003s]
+Active sessions found: 1
+INFO:opensearch:POST http://localhost:9200/sessions/_update/b927f4f3-942d-4d9a-85a7-22730e14a827?refresh=true [status:200 request:0.047s]
+INFO:opensearch:GET http://localhost:9200/users/_doc/c8d08047-15a3-4537-9dd2-a0a25f2af69b [status:200 request:0.002s]
+INFO:werkzeug:127.0.0.1 - - [16/Jun/2025 15:27:31] "GET /api/auth/profile HTTP/1.1" 200 -
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/b24ebe4f-025e-47c7-8a8f-60b0577fafab [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+=== PROFILE REQUEST ===
+User ID: c8d08047-15a3-4537-9dd2-a0a25f2af69b
+JWT Claims: {'fresh': False, 'iat': 1750080448, 'jti': 'b24ebe4f-025e-47c7-8a8f-60b0577fafab', 'type': 'access', 'sub': 'c8d08047-15a3-4537-9dd2-a0a25f2af69b', 'nbf': 1750080448, 'csrf': '51a4bf1b-dcb2-4f2e-a1ff-90e153922fe1', 'exp': 1750166848}
+WARNING:opensearch:GET http://localhost:9200/blacklisted_tokens/_doc/b24ebe4f-025e-47c7-8a8f-60b0577fafab [status:404 request:0.001s]
+ERROR:config.opensearch_client:OpenSearch get error: NotFoundError(404, 'index_not_found_exception', 'no such index [blacklisted_tokens]', blacklisted_tokens, index_expression)
+Token b24ebe4f-025e-47c7-8a8f-60b0577fafab is not blacklisted
+INFO:opensearch:POST http://localhost:9200/sessions/_search [status:200 request:0.003s]
