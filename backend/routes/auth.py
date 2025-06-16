@@ -106,11 +106,28 @@ def login():
         provided_password = data['password']
         
         # Debug logging (remove in production)
+        print(f"=== LOGIN DEBUG ===")
+        print(f"Email found: {user_data['email']}")
+        print(f"Stored hash: {stored_hash}")
         print(f"Stored hash type: {type(stored_hash)}")
         print(f"Provided password: {provided_password}")
+        print(f"Hash starts with $2b$: {stored_hash.startswith('$2b$')}")
         
-        if not check_password_hash(stored_hash, provided_password):
-            return jsonify({'error': 'Invalid credentials'}), 401
+        # Try password verification
+        password_valid = check_password_hash(stored_hash, provided_password)
+        print(f"Password verification result: {password_valid}")
+        
+        if not password_valid:
+            # Try manual bcrypt check as fallback
+            try:
+                import bcrypt
+                manual_check = bcrypt.checkpw(provided_password.encode('utf-8'), stored_hash.encode('utf-8'))
+                print(f"Manual bcrypt check result: {manual_check}")
+                if not manual_check:
+                    return jsonify({'error': 'Invalid credentials'}), 401
+            except Exception as bcrypt_error:
+                print(f"Manual bcrypt check failed: {bcrypt_error}")
+                return jsonify({'error': 'Invalid credentials'}), 401
 
         # Create tokens
         access_token = create_access_token(identity=user_id)
