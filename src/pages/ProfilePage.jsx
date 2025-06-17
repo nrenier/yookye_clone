@@ -259,30 +259,33 @@ function ProfilePage() {
     </Card>
   );
 
-  const renderPackagesSection = () => {
-    const [packages, setPackages] = useState([]);
-    const [packagesLoading, setPackagesLoading] = useState(true);
-    const [packagesError, setPackagesError] = useState("");
+  // Packages state - moved to component level to follow React Hooks rules
+  const [packages, setPackages] = useState([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
+  const [packagesError, setPackagesError] = useState("");
 
-    useEffect(() => {
-      const fetchPackages = async () => {
-        try {
-          setPackagesLoading(true);
-          const { travelAPI } = await import("../services/api");
-          const response = await travelAPI.getUserPackages();
-          setPackages(response.packages || []);
-        } catch (error) {
-          setPackagesError("Errore nel caricamento dei pacchetti");
-          console.error("Error fetching packages:", error);
-        } finally {
-          setPackagesLoading(false);
-        }
-      };
-
-      if (selectedSection === "packages") {
-        fetchPackages();
+  // Fetch packages when packages section is selected
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setPackagesLoading(true);
+        const { travelAPI } = await import("../services/api");
+        const response = await travelAPI.getUserPackages();
+        setPackages(response.packages || []);
+      } catch (error) {
+        setPackagesError("Errore nel caricamento dei pacchetti");
+        console.error("Error fetching packages:", error);
+      } finally {
+        setPackagesLoading(false);
       }
-    }, [selectedSection]);
+    };
+
+    if (selectedSection === "packages") {
+      fetchPackages();
+    }
+  }, [selectedSection]);
+
+  const renderPackagesSection = () => {
 
     const handleViewPackageDetails = (pkg) => {
       console.log("Viewing package details:", pkg);
