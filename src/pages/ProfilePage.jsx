@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -22,7 +22,7 @@ import {
   DialogActions,
   useTheme,
   Avatar,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Person,
   Settings,
@@ -32,30 +32,30 @@ import {
   Edit,
   Save,
   Cancel,
-} from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
-import PackageCard from '../components/packages/PackageCard';
-import { authAPI } from '../services/api';
+} from "@mui/icons-material";
+import { useNavigate, useLocation } from "react-router-dom";
+import Header from "../components/common/Header";
+import Footer from "../components/common/Footer";
+import PackageCard from "../components/packages/PackageCard";
+import { authAPI } from "../services/api";
 
 function ProfilePage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedSection, setSelectedSection] = useState(
-    location.state?.activeSection || 'profile'
+    location.state?.activeSection || "profile",
   );
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    email: '',
+    name: "",
+    username: "",
+    email: "",
   });
 
   useEffect(() => {
@@ -68,13 +68,13 @@ function ProfilePage() {
       const response = await authAPI.getProfile();
       setUser(response.user);
       setFormData({
-        name: response.user.name || '',
-        username: response.user.username || '',
-        email: response.user.email || '',
+        name: response.user.name || "",
+        username: response.user.username || "",
+        email: response.user.email || "",
       });
     } catch (error) {
-      setError('Errore nel caricamento del profilo');
-      console.error('Profile fetch error:', error);
+      setError("Errore nel caricamento del profilo");
+      console.error("Profile fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -82,8 +82,8 @@ function ProfilePage() {
 
   const handleUpdateProfile = async () => {
     try {
-      setError('');
-      setSuccess('');
+      setError("");
+      setSuccess("");
 
       const updateData = {
         name: formData.name,
@@ -91,71 +91,81 @@ function ProfilePage() {
       };
 
       await authAPI.updateProfile(updateData);
-      setSuccess('Profilo aggiornato con successo');
+      setSuccess("Profilo aggiornato con successo");
       setEditMode(false);
       fetchUserProfile();
     } catch (error) {
-      setError('Errore nell\'aggiornamento del profilo');
-      console.error('Profile update error:', error);
+      setError("Errore nell'aggiornamento del profilo");
+      console.error("Profile update error:", error);
     }
   };
 
   const handleLogout = async () => {
     try {
       await authAPI.logout();
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      navigate('/');
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      navigate("/");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       // Force logout even if API call fails
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      navigate('/');
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      navigate("/");
     }
   };
 
   const menuItems = [
-    { id: 'profile', label: 'Il mio profilo', icon: <Person /> },
-    { id: 'preferences', label: 'Le mie preferenze', icon: <Settings /> },
-    { id: 'packages', label: 'I miei pacchetti', icon: <LocalOffer /> },
-    { id: 'bookings', label: 'Le mie prenotazioni', icon: <BookmarkBorder /> },
+    { id: "profile", label: "Il mio profilo", icon: <Person /> },
+    { id: "preferences", label: "Le mie preferenze", icon: <Settings /> },
+    { id: "packages", label: "I miei pacchetti", icon: <LocalOffer /> },
+    { id: "bookings", label: "Le mie prenotazioni", icon: <BookmarkBorder /> },
   ];
 
   const renderProfileSection = () => (
     <Card>
       <CardContent sx={{ p: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
           <Avatar
             sx={{
               width: 80,
               height: 80,
               bgcolor: theme.palette.primary.main,
-              fontSize: '2rem',
+              fontSize: "2rem",
               mr: 3,
             }}
           >
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            {user?.name?.charAt(0)?.toUpperCase() || "U"}
           </Avatar>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-              {user?.name || 'Nome utente'}
+              {user?.name || "Nome utente"}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              @{user?.username || 'username'}
+              @{user?.username || "username"}
             </Typography>
           </Box>
         </Box>
 
-        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 3 }}>{success}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            {success}
+          </Alert>
+        )}
 
         <Box sx={{ mb: 3 }}>
           <TextField
             fullWidth
             label="Nome completo"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
             disabled={!editMode}
             sx={{ mb: 2 }}
           />
@@ -163,7 +173,9 @@ function ProfilePage() {
             fullWidth
             label="Username"
             value={formData.username}
-            onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, username: e.target.value }))
+            }
             disabled={!editMode}
             sx={{ mb: 2 }}
           />
@@ -177,7 +189,7 @@ function ProfilePage() {
           />
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           {!editMode ? (
             <Button
               variant="contained"
@@ -185,7 +197,7 @@ function ProfilePage() {
               onClick={() => setEditMode(true)}
               sx={{
                 backgroundColor: theme.palette.primary.main,
-                '&:hover': { backgroundColor: '#c41e3a' },
+                "&:hover": { backgroundColor: "#c41e3a" },
               }}
             >
               Modifica Profilo
@@ -198,7 +210,7 @@ function ProfilePage() {
                 onClick={handleUpdateProfile}
                 sx={{
                   backgroundColor: theme.palette.primary.main,
-                  '&:hover': { backgroundColor: '#c41e3a' },
+                  "&:hover": { backgroundColor: "#c41e3a" },
                 }}
               >
                 Salva
@@ -209,9 +221,9 @@ function ProfilePage() {
                 onClick={() => {
                   setEditMode(false);
                   setFormData({
-                    name: user?.name || '',
-                    username: user?.username || '',
-                    email: user?.email || '',
+                    name: user?.name || "",
+                    username: user?.username || "",
+                    email: user?.email || "",
                   });
                 }}
               >
@@ -231,14 +243,16 @@ function ProfilePage() {
           Le mie preferenze di viaggio
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Personalizza le tue preferenze per ricevere suggerimenti di viaggio su misura.
+          Personalizza le tue preferenze per ricevere suggerimenti di viaggio su
+          misura.
         </Typography>
-        <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Box sx={{ textAlign: "center", py: 4 }}>
           <Typography variant="h6" color="text.secondary">
             Funzionalità in arrivo
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Presto potrai gestire le tue preferenze di viaggio, budget, tipologie di alloggio e molto altro.
+            Presto potrai gestire le tue preferenze di viaggio, budget,
+            tipologie di alloggio e molto altro.
           </Typography>
         </Box>
       </CardContent>
@@ -248,37 +262,37 @@ function ProfilePage() {
   const renderPackagesSection = () => {
     const [packages, setPackages] = useState([]);
     const [packagesLoading, setPackagesLoading] = useState(true);
-    const [packagesError, setPackagesError] = useState('');
+    const [packagesError, setPackagesError] = useState("");
 
     useEffect(() => {
       const fetchPackages = async () => {
         try {
           setPackagesLoading(true);
-          const { travelAPI } = await import('../services/api');
+          const { travelAPI } = await import("../services/api");
           const response = await travelAPI.getUserPackages();
           setPackages(response.packages || []);
         } catch (error) {
-          setPackagesError('Errore nel caricamento dei pacchetti');
-          console.error('Error fetching packages:', error);
+          setPackagesError("Errore nel caricamento dei pacchetti");
+          console.error("Error fetching packages:", error);
         } finally {
           setPackagesLoading(false);
         }
       };
 
-      if (selectedSection === 'packages') {
+      if (selectedSection === "packages") {
         fetchPackages();
       }
     }, [selectedSection]);
 
     const handleViewPackageDetails = (pkg) => {
-      console.log('Viewing package details:', pkg);
+      console.log("Viewing package details:", pkg);
       // TODO: Implementare modale o pagina dettagli pacchetto
     };
 
     if (packagesLoading) {
       return (
         <Card>
-          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+          <CardContent sx={{ p: 4, textAlign: "center" }}>
             <Typography>Caricamento pacchetti...</Typography>
           </CardContent>
         </Card>
@@ -304,24 +318,27 @@ function ProfilePage() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Ecco i tuoi pacchetti su misura in base alle tue preferenze
           </Typography>
-          
+
           {packages.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <LocalOffer sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <LocalOffer
+                sx={{ fontSize: 64, color: "text.secondary", mb: 2 }}
+              />
               <Typography variant="h6" color="text.secondary">
                 Nessun pacchetto disponibile
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Crea la tua prima richiesta di viaggio per ricevere pacchetti personalizzati.
+                Crea la tua prima richiesta di viaggio per ricevere pacchetti
+                personalizzati.
               </Typography>
               <Button
                 variant="contained"
                 sx={{
                   mt: 3,
                   backgroundColor: theme.palette.primary.main,
-                  '&:hover': { backgroundColor: '#c41e3a' },
+                  "&:hover": { backgroundColor: "#c41e3a" },
                 }}
-                onClick={() => navigate('/form')}
+                onClick={() => navigate("/form")}
               >
                 Crea Richiesta Viaggio
               </Button>
@@ -334,8 +351,8 @@ function ProfilePage() {
               <Grid container spacing={3}>
                 {packages.map((pkg) => (
                   <Grid item xs={12} md={6} lg={4} key={pkg.id}>
-                    <PackageCard 
-                      package={pkg} 
+                    <PackageCard
+                      package={pkg}
                       onViewDetails={handleViewPackageDetails}
                     />
                   </Grid>
@@ -357,8 +374,10 @@ function ProfilePage() {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           Visualizza e gestisci tutte le tue prenotazioni confermate.
         </Typography>
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <BookmarkBorder sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <BookmarkBorder
+            sx={{ fontSize: 64, color: "text.secondary", mb: 2 }}
+          />
           <Typography variant="h6" color="text.secondary">
             Nessuna prenotazione
           </Typography>
@@ -372,13 +391,13 @@ function ProfilePage() {
 
   const renderContent = () => {
     switch (selectedSection) {
-      case 'profile':
+      case "profile":
         return renderProfileSection();
-      case 'preferences':
+      case "preferences":
         return renderPreferencesSection();
-      case 'packages':
+      case "packages":
         return renderPackagesSection();
-      case 'bookings':
+      case "bookings":
         return renderBookingsSection();
       default:
         return renderProfileSection();
@@ -400,8 +419,11 @@ function ProfilePage() {
   return (
     <Box>
       <Header user={user} setUser={setUser} />
-      <Container maxWidth="lg" sx={{ py: 4, minHeight: '80vh' }}>
-        <Typography variant="h3" sx={{ fontWeight: 700, mb: 4, color: theme.palette.secondary.main }}>
+      <Container maxWidth="lg" sx={{ py: 4, minHeight: "80vh" }}>
+        <Typography
+          variant="h3"
+          sx={{ fontWeight: 700, mb: 4, color: theme.palette.secondary.main }}
+        >
           Il mio account
         </Typography>
 
@@ -418,18 +440,19 @@ function ProfilePage() {
                       sx={{
                         borderRadius: 1,
                         mb: 0.5,
-                        '&.Mui-selected': {
+                        "&.Mui-selected": {
                           backgroundColor: theme.palette.primary.main,
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: '#c41e3a',
+                          color: "white",
+                          "&:hover": {
+                            backgroundColor: "#c41e3a",
                           },
                         },
                       }}
                     >
                       <ListItemIcon
                         sx={{
-                          color: selectedSection === item.id ? 'white' : 'inherit',
+                          color:
+                            selectedSection === item.id ? "white" : "inherit",
                         }}
                       >
                         {item.icon}
@@ -440,20 +463,18 @@ function ProfilePage() {
                 ))}
                 <Divider sx={{ my: 2 }} />
                 <ListItem disablePadding>
-                  n>
-
                   <ListItemButton
                     onClick={handleLogout}
                     sx={{
                       borderRadius: 1,
-                      color: 'error.main',
-                      '&:hover': {
-                        backgroundColor: 'error.light',
-                        color: 'error.contrastText',
+                      color: "error.main",
+                      "&:hover": {
+                        backgroundColor: "error.light",
+                        color: "error.contrastText",
                       },
                     }}
                   >
-                    <ListItemIcon sx={{ color: 'inherit' }}>
+                    <ListItemIcon sx={{ color: "inherit" }}>
                       <ExitToApp />
                     </ListItemIcon>
                     <ListItemText primary="Logout" />
