@@ -6,10 +6,11 @@ import { auth, authAPI } from './services/api';
 
 // Pages
 import HomePage from './pages/HomePage';
+import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import FormPage from './pages/FormPage';
 import ProfilePage from './pages/ProfilePage';
+import LoadingPage from './pages/LoadingPage';
 
 const theme = createTheme({
   palette: {
@@ -35,7 +36,7 @@ function App() {
       const token = localStorage.getItem('access_token');
       console.log('=== AUTH CHECK ON APP LOAD ===');
       console.log('Token exists:', !!token);
-      
+
       if (token) {
         try {
           const response = await authAPI.getProfile();
@@ -73,9 +74,10 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage user={user} setUser={setUser} />} />
-          <Route path="/login" element={<LoginPage setUser={setUser} />} />
-          <Route path="/register" element={<RegisterPage setUser={setUser} />} />
           <Route path="/form" element={<FormPage user={user} setUser={setUser} />} />
+          <Route path="/loading" element={<LoadingPage user={user} setUser={setUser} />} />
+          <Route path="/login" element={<LoginPage user={user} setUser={setUser} />} />
+          <Route path="/register" element={<RegisterPage user={user} setUser={setUser} />} />
           <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} />} />
         </Routes>
       </Router>

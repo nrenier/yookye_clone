@@ -602,6 +602,120 @@ def get_travel_statistics():
         }), 500
 
 
+@travel_bp.route('/poll-job/<job_id>', methods=['GET'])
+def poll_job_status(job_id):
+    """Poll external API for job status"""
+    try:
+        # Get fresh token for the request
+        external_token = authenticate_external_api()
+        
+        api_url = os.getenv('TRAVEL_API_URL')
+        if not api_url:
+            raise Exception("External API URL not configured")
+
+        status_url = f"{api_url}/api/search/{job_id}"
+        
+        headers = {
+            'Authorization': f'Bearer {external_token}',
+            'Content-Type': 'application/json'
+        }
+
+        print(f"[DEBUG] Polling job status for job_id: {job_id}")
+        print(f"[DEBUG] Status URL: {status_url}")
+
+        # Make status request with SSL verification disabled for development
+        verify_ssl = not api_url.startswith('https://localhost')
+
+        response = requests.get(status_url,
+                                headers=headers,
+                                timeout=30,
+                                verify=verify_ssl)
+
+        print(f"[DEBUG] Status response: {response.status_code}")
+        print(f"[DEBUG] Status content: {response.text}")
+
+        if response.status_code == 401:
+            raise Exception("Authentication failed for status request")
+
+        if not response.ok:
+            raise Exception(f"Status request failed: {response.status_code} - {response.text}")
+
+        try:
+            status_data = response.json()
+            return jsonify(status_data), 200
+
+        except ValueError as e:
+            print(f"[DEBUG] Failed to parse status response JSON: {str(e)}")
+            raise Exception(f"Invalid JSON response from status API: {str(e)}")
+
+    except Exception as e:
+        print(f"[DEBUG] Job status polling error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to poll job status',
+            'details': str(e)
+        }), 500
+
+
+@travel_bp.route('/get-job-result/<job_id>', methods=['GET'])
+def get_job_result(job_id):
+    """Get job result from external API when completed"""
+    try:
+        # Get fresh token for the request
+        external_token = authenticate_external_api()
+        
+        api_url = os.getenv('TRAVEL_API_URL')
+        if not api_url:
+            raise Exception("External API URL not configured")
+
+        result_url = f"{api_url}/api/search/{job_id}/result"
+        
+        headers = {
+            'Authorization': f'Bearer {external_token}',
+            'Content-Type': 'application/json'
+        }
+
+        print(f"[DEBUG] Getting job result for job_id: {job_id}")
+        print(f"[DEBUG] Result URL: {result_url}")
+
+        # Make result request with SSL verification disabled for development
+        verify_ssl = not api_url.startswith('https://localhost')
+
+        response = requests.get(result_url,
+                                headers=headers,
+                                timeout=30,
+                                verify=verify_ssl)
+
+        print(f"[DEBUG] Result response: {response.status_code}")
+        print(f"[DEBUG] Result content: {response.text}")
+
+        if response.status_code == 401:
+            raise Exception("Authentication failed for result request")
+
+        if not response.ok:
+            raise Exception(f"Result request failed: {response.status_code} - {response.text}")
+
+        try:
+            result_data = response.json()
+            
+            # Log the result as requested
+            print(f"[INFO] JOB RESULT RECEIVED:")
+            print(f"[INFO] Job ID: {job_id}")
+            print(f"[INFO] Result Data: {result_data}")
+            
+            return jsonify(result_data), 200
+
+        except ValueError as e:
+            print(f"[DEBUG] Failed to parse result response JSON: {str(e)}")
+            raise Exception(f"Invalid JSON response from result API: {str(e)}")
+
+    except Exception as e:
+        print(f"[DEBUG] Job result retrieval error: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get job result',
+            'details': str(e)
+        }), 500
+
+
 @travel_bp.route('/destinations', methods=['GET'])
 def get_destinations():
     """Get available destinations (public endpoint)"""

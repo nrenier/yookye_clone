@@ -157,6 +157,10 @@ export const travelAPI = {
   getStatistics: () => apiCall('/travel/statistics'),
 
   getDestinations: () => apiCall('/travel/destinations'),
+
+  pollJobStatus: (jobId) => apiCall(`/travel/poll-job/${jobId}`),
+
+  getJobResult: (jobId) => apiCall(`/travel/get-job-result/${jobId}`),
 };
 
 // User API
