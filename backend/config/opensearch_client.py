@@ -182,10 +182,12 @@ def create_indices():
                         'type': 'keyword'
                     },
                     'hotels_selezionati': {
-                        'type': 'object'
+                        'type': 'object',
+                        'enabled': False
                     },
                     'esperienze_selezionate': {
-                        'type': 'object'
+                        'type': 'object',
+                        'enabled': False
                     },
                     'status': {
                         'type': 'keyword'
@@ -196,7 +198,8 @@ def create_indices():
                     'updated_at': {
                         'type': 'date'
                     }
-                }
+                },
+                'dynamic': True
             }
         }
     }
