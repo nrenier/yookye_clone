@@ -168,6 +168,36 @@ def create_indices():
                     }
                 }
             }
+        },
+        'travel_packages': {
+            'mappings': {
+                'properties': {
+                    'job_id': {
+                        'type': 'keyword'
+                    },
+                    'user_id': {
+                        'type': 'keyword'
+                    },
+                    'package_id': {
+                        'type': 'keyword'
+                    },
+                    'hotels_selezionati': {
+                        'type': 'object'
+                    },
+                    'esperienze_selezionate': {
+                        'type': 'object'
+                    },
+                    'status': {
+                        'type': 'keyword'
+                    },
+                    'created_at': {
+                        'type': 'date'
+                    },
+                    'updated_at': {
+                        'type': 'date'
+                    }
+                }
+            }
         }
     }
 

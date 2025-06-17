@@ -269,12 +269,23 @@ function ProfilePage() {
     const fetchPackages = async () => {
       try {
         setPackagesLoading(true);
+        setPackagesError("");
+        console.log("[DEBUG] Fetching user packages...");
+        
         const { travelAPI } = await import("../services/api");
         const response = await travelAPI.getUserPackages();
+        
+        console.log("[DEBUG] Packages response received:", response);
+        console.log("[DEBUG] Number of packages:", response.packages?.length || 0);
+        
         setPackages(response.packages || []);
+        
+        if (response.packages && response.packages.length > 0) {
+          console.log("[DEBUG] First package:", response.packages[0]);
+        }
       } catch (error) {
-        setPackagesError("Errore nel caricamento dei pacchetti");
-        console.error("Error fetching packages:", error);
+        console.error("[ERROR] Error fetching packages:", error);
+        setPackagesError(`Errore nel caricamento dei pacchetti: ${error.message}`);
       } finally {
         setPackagesLoading(false);
       }
@@ -286,6 +297,10 @@ function ProfilePage() {
   }, [selectedSection]);
 
   const renderPackagesSection = () => {
+    console.log("[DEBUG] Rendering packages section");
+    console.log("[DEBUG] Packages state:", packages);
+    console.log("[DEBUG] Packages loading:", packagesLoading);
+    console.log("[DEBUG] Packages error:", packagesError);
 
     const handleViewPackageDetails = (pkg) => {
       console.log("Viewing package details:", pkg);
