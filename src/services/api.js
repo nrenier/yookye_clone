@@ -161,6 +161,8 @@ export const travelAPI = {
   pollJobStatus: (jobId) => apiCall(`/travel/poll-job/${jobId}`),
 
   getJobResult: (jobId) => apiCall(`/travel/get-job-result/${jobId}`),
+
+  getUserPackages: () => apiCall('/travel/my-packages'),
 };
 
 // User API

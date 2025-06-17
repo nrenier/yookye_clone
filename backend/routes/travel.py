@@ -72,6 +72,39 @@ def map_form_data_to_external_format(form_data):
     sistemazione = {
         "livello": {
             "fascia_media": acc_level == 'mid',
+
+def save_travel_packages(job_id, packages_data):
+    """Save travel packages received from external API to database"""
+    try:
+        packages_saved = 0
+        
+        for package in packages_data:
+            package_id = str(uuid.uuid4())
+            
+            # Prepare package data for storage
+            package_doc = {
+                'job_id': job_id,
+                'package_id': package.get('id_pacchetto', f'package_{packages_saved + 1}'),
+                'hotels_selezionati': package.get('hotels_selezionati', {}),
+                'esperienze_selezionate': package.get('esperienze_selezionate', {}),
+                'status': 'available',
+                'created_at': datetime.utcnow().isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            # Store package in OpenSearch
+            opensearch_ops.index_document('travel_packages', package_id, package_doc)
+            packages_saved += 1
+            
+            print(f"[DEBUG] Saved package {package_doc['package_id']} with ID {package_id}")
+        
+        return packages_saved
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to save travel packages: {str(e)}")
+        return 0
+
+
             "boutique": acc_level == 'boutique',
             "eleganti": acc_level == 'luxury'
         },
@@ -702,6 +735,11 @@ def get_job_result(job_id):
             print(f"[INFO] Job ID: {job_id}")
             print(f"[INFO] Result Data: {result_data}")
             
+            # Save travel packages to database
+            if isinstance(result_data, list) and result_data:
+                packages_saved = save_travel_packages(job_id, result_data)
+                print(f"[INFO] Saved {packages_saved} travel packages for job {job_id}")
+            
             return jsonify(result_data), 200
 
         except ValueError as e:
@@ -799,3 +837,126 @@ def get_destinations():
     }]
 
     return jsonify({'destinations': destinations}), 200
+
+
+@travel_bp.route('/my-packages', methods=['GET'])
+@jwt_required()
+def get_user_packages():
+    """Get user's travel packages"""
+    try:
+        user_id = get_jwt_identity()
+
+        # Get user's travels to find associated job IDs
+        travels_result = opensearch_ops.search_documents(
+            'travels', 
+            query={'term': {'user_id': user_id}}, 
+            size=100
+        )
+
+        job_ids = []
+        travels_map = {}
+        for hit in travels_result['hits']['hits']:
+            travel_data = hit['_source']
+            external_job_id = travel_data.get('external_job_id')
+            if external_job_id:
+                job_ids.append(external_job_id)
+                travels_map[external_job_id] = {
+                    'travel_id': hit['_id'],
+                    'travel_data': travel_data
+                }
+
+        if not job_ids:
+            return jsonify({'packages': [], 'total': 0}), 200
+
+        # Search for packages associated with user's job IDs
+        packages_query = {
+            'bool': {
+                'should': [
+                    {'term': {'job_id': job_id}} for job_id in job_ids
+                ]
+            }
+        }
+
+        packages_result = opensearch_ops.search_documents(
+            'travel_packages',
+            query=packages_query,
+            size=100
+        )
+
+        packages = []
+        for hit in packages_result['hits']['hits']:
+            package_data = hit['_source']
+            job_id = package_data['job_id']
+            
+            # Get associated travel info
+            travel_info = travels_map.get(job_id, {})
+            
+            # Calculate total price
+            total_price = calculate_package_price(package_data)
+            
+            # Get destinations from hotels
+            destinations = list(package_data.get('hotels_selezionati', {}).keys())
+            
+            packages.append({
+                'id': hit['_id'],
+                'package_id': package_data['package_id'],
+                'job_id': job_id,
+                'travel_id': travel_info.get('travel_id'),
+                'destinations': destinations,
+                'hotels': package_data.get('hotels_selezionati', {}),
+                'experiences': package_data.get('esperienze_selezionate', {}),
+                'total_price': total_price,
+                'status': package_data.get('status', 'available'),
+                'created_at': package_data.get('created_at'),
+                'original_request': {
+                    'passions': travel_info.get('travel_data', {}).get('passions', []),
+                    'travelers': travel_info.get('travel_data', {}).get('travelers', {}),
+                    'dates': travel_info.get('travel_data', {}).get('dates', {})
+                }
+            })
+
+        # Sort by creation date (most recent first)
+        packages.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+
+        return jsonify({'packages': packages, 'total': len(packages)}), 200
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to get travel packages',
+            'details': str(e)
+        }), 500
+
+
+def calculate_package_price(package_data):
+    """Calculate total price for a travel package"""
+    try:
+        total_price = 0
+        
+        # Sum hotel prices
+        hotels = package_data.get('hotels_selezionati', {})
+        for city, hotel in hotels.items():
+            daily_price = hotel.get('daily_prices', 0)
+            if isinstance(daily_price, (int, float)):
+                # Calculate nights between check-in and check-out
+                checkin = hotel.get('checkin', '')
+                checkout = hotel.get('checkout', '')
+                
+                if checkin and checkout:
+                    try:
+                        from datetime import datetime
+                        checkin_date = datetime.strptime(checkin, '%d/%m/%Y')
+                        checkout_date = datetime.strptime(checkout, '%d/%m/%Y')
+                        nights = (checkout_date - checkin_date).days
+                        total_price += daily_price * nights
+                    except:
+                        # Default to 1 night if date parsing fails
+                        total_price += daily_price
+                else:
+                    total_price += daily_price
+        
+        return round(total_price, 2)
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to calculate package price: {str(e)}")
+        return 0
+

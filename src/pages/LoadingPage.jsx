@@ -115,6 +115,11 @@ const LoadingPage = ({ user, setUser }) => {
       console.log('[INFO] Job result received:', resultResponse);
       setResult(resultResponse);
       setStatus('COMPLETED');
+      
+      // Auto-redirect to packages after 3 seconds
+      setTimeout(() => {
+        navigate('/profile', { state: { activeSection: 'packages' } });
+      }, 3000);
     } catch (error) {
       console.error('[ERROR] Failed to get job result:', error);
       setError(`Errore durante il recupero del risultato: ${error.message}`);

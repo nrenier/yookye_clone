@@ -33,15 +33,19 @@ import {
   Save,
   Cancel,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import PackageCard from '../components/packages/PackageCard';
 import { authAPI } from '../services/api';
 
 function ProfilePage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [selectedSection, setSelectedSection] = useState('profile');
+  const location = useLocation();
+  const [selectedSection, setSelectedSection] = useState(
+    location.state?.activeSection || 'profile'
+  );
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -241,38 +245,108 @@ function ProfilePage() {
     </Card>
   );
 
-  const renderPackagesSection = () => (
-    <Card>
-      <CardContent sx={{ p: 4 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-          I miei pacchetti viaggio
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Gestisci i tuoi pacchetti viaggio personalizzati e le proposte ricevute.
-        </Typography>
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <LocalOffer sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">
-            Nessun pacchetto disponibile
+  const renderPackagesSection = () => {
+    const [packages, setPackages] = useState([]);
+    const [packagesLoading, setPackagesLoading] = useState(true);
+    const [packagesError, setPackagesError] = useState('');
+
+    useEffect(() => {
+      const fetchPackages = async () => {
+        try {
+          setPackagesLoading(true);
+          const { travelAPI } = await import('../services/api');
+          const response = await travelAPI.getUserPackages();
+          setPackages(response.packages || []);
+        } catch (error) {
+          setPackagesError('Errore nel caricamento dei pacchetti');
+          console.error('Error fetching packages:', error);
+        } finally {
+          setPackagesLoading(false);
+        }
+      };
+
+      if (selectedSection === 'packages') {
+        fetchPackages();
+      }
+    }, [selectedSection]);
+
+    const handleViewPackageDetails = (pkg) => {
+      console.log('Viewing package details:', pkg);
+      // TODO: Implementare modale o pagina dettagli pacchetto
+    };
+
+    if (packagesLoading) {
+      return (
+        <Card>
+          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+            <Typography>Caricamento pacchetti...</Typography>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (packagesError) {
+      return (
+        <Card>
+          <CardContent sx={{ p: 4 }}>
+            <Alert severity="error">{packagesError}</Alert>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <Card>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            I miei pacchetti viaggio
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Crea la tua prima richiesta di viaggio per ricevere pacchetti personalizzati.
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Ecco i tuoi pacchetti su misura in base alle tue preferenze
           </Typography>
-          <Button
-            variant="contained"
-            sx={{
-              mt: 3,
-              backgroundColor: theme.palette.primary.main,
-              '&:hover': { backgroundColor: '#c41e3a' },
-            }}
-            onClick={() => navigate('/form')}
-          >
-            Crea Richiesta Viaggio
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
-  );
+          
+          {packages.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <LocalOffer sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary">
+                Nessun pacchetto disponibile
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Crea la tua prima richiesta di viaggio per ricevere pacchetti personalizzati.
+              </Typography>
+              <Button
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  backgroundColor: theme.palette.primary.main,
+                  '&:hover': { backgroundColor: '#c41e3a' },
+                }}
+                onClick={() => navigate('/form')}
+              >
+                Crea Richiesta Viaggio
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Pacchetti Consigliati ({packages.length})
+              </Typography>
+              <Grid container spacing={3}>
+                {packages.map((pkg) => (
+                  <Grid item xs={12} md={6} lg={4} key={pkg.id}>
+                    <PackageCard 
+                      package={pkg} 
+                      onViewDetails={handleViewPackageDetails}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderBookingsSection = () => (
     <Card>
