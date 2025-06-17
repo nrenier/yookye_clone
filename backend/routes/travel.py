@@ -139,7 +139,7 @@ def map_form_data_to_external_format(form_data):
     }
 
 
-def save_travel_packages(job_id, packages_data):
+def save_travel_packages(job_id, packages_data, user_id=None):
     """Save travel packages received from external API to database"""
     try:
         packages_saved = 0
@@ -150,6 +150,7 @@ def save_travel_packages(job_id, packages_data):
             # Prepare package data for storage
             package_doc = {
                 'job_id': job_id,
+                'user_id': user_id,
                 'package_id': package.get('id_pacchetto', f'package_{packages_saved + 1}'),
                 'hotels_selezionati': package.get('hotels_selezionati', {}),
                 'esperienze_selezionate': package.get('esperienze_selezionate', {}),
@@ -162,7 +163,7 @@ def save_travel_packages(job_id, packages_data):
             opensearch_ops.index_document('travel_packages', package_id, package_doc)
             packages_saved += 1
             
-            print(f"[DEBUG] Saved package {package_doc['package_id']} with ID {package_id}")
+            print(f"[DEBUG] Saved package {package_doc['package_id']} with ID {package_id} for user {user_id}")
         
         return packages_saved
         
@@ -787,10 +788,26 @@ def get_job_result(job_id):
             print(f"[INFO] Job ID: {job_id}")
             print(f"[INFO] Result Data: {result_data}")
             
+            # Get user_id from the travel request associated with this job
+            user_id = None
+            try:
+                # Find the travel request with this external_job_id
+                travels_result = opensearch_ops.search_documents(
+                    'travels',
+                    query={'term': {'external_job_id': job_id}},
+                    size=1
+                )
+                if travels_result['hits']['total']['value'] > 0:
+                    travel_data = travels_result['hits']['hits'][0]['_source']
+                    user_id = travel_data.get('user_id')
+                    print(f"[DEBUG] Found user_id {user_id} for job {job_id}")
+            except Exception as e:
+                print(f"[ERROR] Failed to find user for job {job_id}: {str(e)}")
+            
             # Save travel packages to database
             if isinstance(result_data, list) and result_data:
-                packages_saved = save_travel_packages(job_id, result_data)
-                print(f"[INFO] Saved {packages_saved} travel packages for job {job_id}")
+                packages_saved = save_travel_packages(job_id, result_data, user_id)
+                print(f"[INFO] Saved {packages_saved} travel packages for job {job_id} and user {user_id}")
             
             return jsonify(result_data), 200
 
@@ -920,12 +937,13 @@ def get_user_packages():
         if not job_ids:
             return jsonify({'packages': [], 'total': 0}), 200
 
-        # Search for packages associated with user's job IDs
+        # Search for packages associated with user's job IDs or directly with user_id
+        should_clauses = [{'term': {'job_id': job_id}} for job_id in job_ids]
+        should_clauses.append({'term': {'user_id': user_id}})
+        
         packages_query = {
             'bool': {
-                'should': [
-                    {'term': {'job_id': job_id}} for job_id in job_ids
-                ]
+                'should': should_clauses
             }
         }
 

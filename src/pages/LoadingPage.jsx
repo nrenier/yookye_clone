@@ -113,13 +113,15 @@ const LoadingPage = ({ user, setUser }) => {
       console.log(`[DEBUG] Getting result for job: ${jobId}`);
       const resultResponse = await travelAPI.getJobResult(jobId);
       console.log('[INFO] Job result received:', resultResponse);
+      console.log('[DEBUG] Packages should be saved to database now...');
       setResult(resultResponse);
       setStatus('COMPLETED');
       
-      // Auto-redirect to packages after 3 seconds
+      // Wait a bit longer to ensure packages are saved
       setTimeout(() => {
+        console.log('[DEBUG] Redirecting to profile packages section...');
         navigate('/profile', { state: { activeSection: 'packages' } });
-      }, 3000);
+      }, 5000);
     } catch (error) {
       console.error('[ERROR] Failed to get job result:', error);
       setError(`Errore durante il recupero del risultato: ${error.message}`);
