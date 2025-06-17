@@ -41,10 +41,19 @@ def map_form_data_to_external_format(form_data):
         "baby_number": form_data.get('infants', 0)
     }
 
-    # Map dates
+    # Map dates - convert date objects to strings
+    check_in = form_data.get('check_in', '')
+    check_out = form_data.get('check_out', '')
+    
+    # Convert date objects to string format if they exist
+    if hasattr(check_in, 'isoformat'):
+        check_in = check_in.isoformat()
+    if hasattr(check_out, 'isoformat'):
+        check_out = check_out.isoformat()
+    
     date = {
-        "check_in_time": form_data.get('check_in', ''),
-        "check_out_time": form_data.get('check_out', '')
+        "check_in_time": check_in,
+        "check_out_time": check_out
     }
 
     # Map budget
