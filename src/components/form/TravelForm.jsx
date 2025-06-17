@@ -108,8 +108,16 @@ function TravelForm() {
       // Submit form to backend
       const response = await travelAPI.submitForm(backendFormData);
 
+      // Log job ID if available
+      if (response.external_job_id) {
+        console.log(`🚀 Job ID remoto lanciato: ${response.external_job_id}`);
+      }
+
       // Show success message
-      alert(`Richiesta inviata con successo! ${response.next_steps}`);
+      const jobMessage = response.external_job_id 
+        ? `\n\nJob ID remoto: ${response.external_job_id}` 
+        : '';
+      alert(`Richiesta inviata con successo! ${response.next_steps}${jobMessage}`);
 
       // Reset form
       setFormData({

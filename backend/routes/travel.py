@@ -15,6 +15,118 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 travel_bp = Blueprint('travel', __name__)
 
+def map_form_data_to_external_format(form_data):
+    """Map internal form data to external API format"""
+    
+    # Map transportation
+    transportation_known = form_data.get('transportation_known', '')
+    trasporti = {
+        "conosci_arrivo_e_partenza": transportation_known == 'yes',
+        "description": form_data.get('arrival_departure', ''),
+        "auto_propria": transportation_known == 'car',
+        "Unknown": transportation_known == 'no'
+    }
+    
+    # Map places
+    luoghi_da_non_perdere = {
+        "city": form_data.get('places_to_visit', ''),
+        "luoghi_specifici": form_data.get('specific_places') == 'yes'
+    }
+    
+    # Map travelers
+    viaggiatori = {
+        "adults_number": form_data.get('adults', 1),
+        "children_number": form_data.get('children', 0),
+        "baby_number": form_data.get('infants', 0)
+    }
+    
+    # Map dates
+    date = {
+        "check_in_time": form_data.get('check_in', ''),
+        "check_out_time": form_data.get('check_out', '')
+    }
+    
+    # Map budget
+    budget = form_data.get('budget', '')
+    budget_per_persona_giorno = {
+        "economico": budget == 'budget',
+        "fascia_media": budget == 'midrange',
+        "comfort": budget == 'comfort',
+        "lusso": budget == 'luxury',
+        "ultra_lusso": False  # Not in our form
+    }
+    
+    # Map accommodation
+    acc_level = form_data.get('accommodation_level', '')
+    acc_type = form_data.get('accommodation_type', '')
+    sistemazione = {
+        "livello": {
+            "fascia_media": acc_level == 'mid',
+            "boutique": acc_level == 'boutique',
+            "eleganti": acc_level == 'luxury'
+        },
+        "tipologia": {
+            "hotel": acc_type == 'hotel',
+            "b&b": acc_type == 'bnb',
+            "agriturismo": acc_type == 'agriturismo',
+            "villa": acc_type == 'villa',
+            "appartamento": acc_type == 'appartamento',
+            "glamping": acc_type == 'glamping'
+        }
+    }
+    
+    # Map passions to interests
+    passions = form_data.get('passions', [])
+    interessi = {
+        "storia_e_arte": {
+            "musei_e_gallerie": "Musei e gallerie" in passions,
+            "siti_archeologici": "Siti archeologici" in passions,
+            "monumenti_e_architettura": "Monumenti e architetture" in passions
+        },
+        "Food_&_wine": {
+            "visite_alle_cantine": "Visite alle cantine" in passions,
+            "corsi_di_cucina": "Corsi di cucina" in passions,
+            "soggiorni_nella_wine_country": "Soggiorni nella Wine Country" in passions
+        },
+        "vacanze_attive": {
+            "trekking_di_piu_giorni": "Trekking tour" in passions,
+            "tour_in_e_bike_di_piu_giorni": "Tour in e-bike" in passions,
+            "sci_snowboard_di_piu_giorni": "Sci/snowboard" in passions
+        },
+        "vita_locale": "Local Life" in passions,
+        "salute_e_benessere": "Salute & Benessere" in passions
+    }
+    
+    # Map traveler type
+    traveler_type = form_data.get('traveler_type', '')
+    tipologia_viaggiatore = {
+        "family": traveler_type == 'famiglia',
+        "amici": traveler_type == 'amici',
+        "coppia": traveler_type == 'coppia',
+        "single": False  # Not explicitly in our form
+    }
+    
+    # Map travel pace
+    pace = form_data.get('travel_pace', '')
+    ritmo_ideale = {
+        "veloce": pace == 'fast',
+        "moderato": pace == 'moderate',
+        "rilassato": pace == 'relaxed'
+    }
+    
+    return {
+        "trasporti": trasporti,
+        "luoghi_da_non_perdere": luoghi_da_non_perdere,
+        "viaggiatori": viaggiatori,
+        "date": date,
+        "budget_per_persona_giorno": budget_per_persona_giorno,
+        "sistemazione": sistemazione,
+        "esigenze_particolari": form_data.get('special_services', ''),
+        "interessi": interessi,
+        "tipologia_viaggiatore": tipologia_viaggiatore,
+        "ritmo_ideale": ritmo_ideale
+    }
+
 def authenticate_external_api():
     """Authenticate with external travel API and return access token"""
     try:
@@ -95,6 +207,72 @@ def authenticate_external_api():
         print(f"[DEBUG] Unexpected error: {str(e)}")
         raise Exception(f"External API authentication error: {str(e)}")
 
+def send_search_request_to_external_api(access_token, search_data):
+    """Send search request to external API and return job ID"""
+    try:
+        api_url = os.getenv('TRAVEL_API_URL')
+        if not api_url:
+            raise Exception("External API URL not configured")
+        
+        search_url = f"{api_url}/search"
+        
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        print(f"[DEBUG] Sending search request to: {search_url}")
+        print(f"[DEBUG] Request headers: {headers}")
+        print(f"[DEBUG] Request body: {search_data}")
+        
+        # Make search request with SSL verification disabled for development
+        verify_ssl = not api_url.startswith('https://localhost')
+        
+        response = requests.post(
+            search_url,
+            json=search_data,
+            headers=headers,
+            timeout=30,
+            verify=verify_ssl
+        )
+        
+        print(f"[DEBUG] Search response status: {response.status_code}")
+        print(f"[DEBUG] Search response content: {response.text}")
+        
+        if response.status_code == 401:
+            raise Exception("Authentication failed for search request")
+        
+        if not response.ok:
+            raise Exception(f"Search request failed: {response.status_code} - {response.text}")
+        
+        try:
+            response_data = response.json()
+            job_id = response_data.get('job_id') or response_data.get('id') or response_data.get('task_id')
+            
+            if not job_id:
+                print(f"[DEBUG] No job ID found in response: {response_data}")
+                raise Exception("No job ID returned from search request")
+            
+            print(f"[DEBUG] Job ID received: {job_id}")
+            return job_id
+            
+        except ValueError as e:
+            print(f"[DEBUG] Failed to parse search response JSON: {str(e)}")
+            raise Exception(f"Invalid JSON response from search API: {str(e)}")
+    
+    except requests.exceptions.ConnectTimeout:
+        print(f"[DEBUG] Search request timeout to {search_url}")
+        raise Exception(f"Search request timeout to external API")
+    except requests.exceptions.ConnectionError as e:
+        print(f"[DEBUG] Search request connection error: {str(e)}")
+        raise Exception(f"Failed to connect to search API: {str(e)}")
+    except requests.exceptions.RequestException as e:
+        print(f"[DEBUG] Search request exception: {str(e)}")
+        raise Exception(f"Search request failed: {str(e)}")
+    except Exception as e:
+        print(f"[DEBUG] Unexpected search error: {str(e)}")
+        raise Exception(f"Search request error: {str(e)}")
+
 # Validation schema for travel form
 class TravelFormSchema(Schema):
     passions = fields.List(fields.Str(), required=True)
@@ -137,6 +315,23 @@ def submit_travel_form():
             print(f"[DEBUG] External API authentication failed: {str(e)}")
             return jsonify({
                 'error': 'External service authentication failed', 
+                'details': str(e)
+            }), 503
+
+        # Map form data to external API format
+        print(f"[DEBUG] Mapping form data to external API format...")
+        external_search_data = map_form_data_to_external_format(data)
+        print(f"[DEBUG] Mapped data: {external_search_data}")
+
+        # Send search request to external API
+        print(f"[DEBUG] Sending search request to external API...")
+        try:
+            job_id = send_search_request_to_external_api(external_token, external_search_data)
+            print(f"[DEBUG] Search job started successfully with ID: {job_id}")
+        except Exception as e:
+            print(f"[DEBUG] External search request failed: {str(e)}")
+            return jsonify({
+                'error': 'External search request failed', 
                 'details': str(e)
             }), 503
 
@@ -183,6 +378,8 @@ def submit_travel_form():
             'status': 'submitted',
             'external_api_authenticated': True,
             'external_token_obtained_at': datetime.utcnow().isoformat(),
+            'external_job_id': job_id,
+            'external_search_data': external_search_data,
             'created_at': datetime.utcnow().isoformat(),
             'updated_at': datetime.utcnow().isoformat()
         }
@@ -200,6 +397,7 @@ def submit_travel_form():
             'travel_id': travel_id,
             'status': 'submitted',
             'external_api_authenticated': True,
+            'external_job_id': job_id,
             'next_steps': 'Our local experts will review your request and send you personalized proposals via email within 24-48 hours.'
         }), 201
 
