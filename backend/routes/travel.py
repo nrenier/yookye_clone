@@ -15,9 +15,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 travel_bp = Blueprint('travel', __name__)
 
+
 def map_form_data_to_external_format(form_data):
     """Map internal form data to external API format"""
-    
+
     # Map transportation
     transportation_known = form_data.get('transportation_known', '')
     trasporti = {
@@ -26,26 +27,26 @@ def map_form_data_to_external_format(form_data):
         "auto_propria": transportation_known == 'car',
         "Unknown": transportation_known == 'no'
     }
-    
+
     # Map places
     luoghi_da_non_perdere = {
         "city": form_data.get('places_to_visit', ''),
         "luoghi_specifici": form_data.get('specific_places') == 'yes'
     }
-    
+
     # Map travelers
     viaggiatori = {
         "adults_number": form_data.get('adults', 1),
         "children_number": form_data.get('children', 0),
         "baby_number": form_data.get('infants', 0)
     }
-    
+
     # Map dates
     date = {
         "check_in_time": form_data.get('check_in', ''),
         "check_out_time": form_data.get('check_out', '')
     }
-    
+
     # Map budget
     budget = form_data.get('budget', '')
     budget_per_persona_giorno = {
@@ -55,7 +56,7 @@ def map_form_data_to_external_format(form_data):
         "lusso": budget == 'luxury',
         "ultra_lusso": False  # Not in our form
     }
-    
+
     # Map accommodation
     acc_level = form_data.get('accommodation_level', '')
     acc_type = form_data.get('accommodation_type', '')
@@ -74,7 +75,7 @@ def map_form_data_to_external_format(form_data):
             "glamping": acc_type == 'glamping'
         }
     }
-    
+
     # Map passions to interests
     passions = form_data.get('passions', [])
     interessi = {
@@ -84,9 +85,12 @@ def map_form_data_to_external_format(form_data):
             "monumenti_e_architettura": "Monumenti e architetture" in passions
         },
         "Food_&_wine": {
-            "visite_alle_cantine": "Visite alle cantine" in passions,
-            "corsi_di_cucina": "Corsi di cucina" in passions,
-            "soggiorni_nella_wine_country": "Soggiorni nella Wine Country" in passions
+            "visite_alle_cantine":
+            "Visite alle cantine" in passions,
+            "corsi_di_cucina":
+            "Corsi di cucina" in passions,
+            "soggiorni_nella_wine_country":
+            "Soggiorni nella Wine Country" in passions
         },
         "vacanze_attive": {
             "trekking_di_piu_giorni": "Trekking tour" in passions,
@@ -96,7 +100,7 @@ def map_form_data_to_external_format(form_data):
         "vita_locale": "Local Life" in passions,
         "salute_e_benessere": "Salute & Benessere" in passions
     }
-    
+
     # Map traveler type
     traveler_type = form_data.get('traveler_type', '')
     tipologia_viaggiatore = {
@@ -105,7 +109,7 @@ def map_form_data_to_external_format(form_data):
         "coppia": traveler_type == 'coppia',
         "single": False  # Not explicitly in our form
     }
-    
+
     # Map travel pace
     pace = form_data.get('travel_pace', '')
     ritmo_ideale = {
@@ -113,7 +117,7 @@ def map_form_data_to_external_format(form_data):
         "moderato": pace == 'moderate',
         "rilassato": pace == 'relaxed'
     }
-    
+
     return {
         "trasporti": trasporti,
         "luoghi_da_non_perdere": luoghi_da_non_perdere,
@@ -127,6 +131,7 @@ def map_form_data_to_external_format(form_data):
         "ritmo_ideale": ritmo_ideale
     }
 
+
 def authenticate_external_api():
     """Authenticate with external travel API and return access token"""
     try:
@@ -138,16 +143,15 @@ def authenticate_external_api():
         print(f"[DEBUG] External API Configuration:")
         print(f"[DEBUG] API URL: {api_url}")
         print(f"[DEBUG] API Username: {api_username}")
-        print(f"[DEBUG] API Password: {'*' * len(api_password) if api_password else 'None'}")
+        print(
+            f"[DEBUG] API Password: {'*' * len(api_password) if api_password else 'None'}"
+        )
 
         if not all([api_url, api_username, api_password]):
             raise Exception("External API configuration is missing")
 
         # Prepare authentication data
-        auth_data = {
-            'username': api_username,
-            'password': api_password
-        }
+        auth_data = {'username': api_username, 'password': api_password}
 
         # Make authentication request
         auth_url = f"{api_url}/api/auth/token"
@@ -158,8 +162,12 @@ def authenticate_external_api():
 
         print(f"[DEBUG] Making authentication request to: {auth_url}")
         print(f"[DEBUG] Request method: POST")
-        print(f"[DEBUG] Request headers: {{'Content-Type': 'application/x-www-form-urlencoded'}}")
-        print(f"[DEBUG] Request data: {{'username': '{api_username}', 'password': '***'}}")
+        print(
+            f"[DEBUG] Request headers: {{'Content-Type': 'application/x-www-form-urlencoded'}}"
+        )
+        print(
+            f"[DEBUG] Request data: {{'username': '{api_username}', 'password': '***'}}"
+        )
         print(f"[DEBUG] SSL verification: {verify_ssl}")
         print(f"[DEBUG] Timeout: 10 seconds")
 
@@ -168,8 +176,7 @@ def authenticate_external_api():
             data=auth_data,  # OAuth2PasswordRequestForm expects form data
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             timeout=10,
-            verify=verify_ssl
-        )
+            verify=verify_ssl)
 
         print(f"[DEBUG] Response received:")
         print(f"[DEBUG] Status code: {response.status_code}")
@@ -181,18 +188,23 @@ def authenticate_external_api():
             raise Exception("Invalid credentials for external API")
 
         if not response.ok:
-            print(f"[DEBUG] Authentication failed: HTTP {response.status_code}")
-            raise Exception(f"External API authentication failed: {response.status_code}")
+            print(
+                f"[DEBUG] Authentication failed: HTTP {response.status_code}")
+            raise Exception(
+                f"External API authentication failed: {response.status_code}")
 
         try:
             token_data = response.json()
             print(f"[DEBUG] Token data received: {token_data}")
             access_token = token_data.get('access_token')
-            print(f"[DEBUG] Access token extracted: {'***' + access_token[-10:] if access_token else 'None'}")
+            print(
+                f"[DEBUG] Access token extracted: {'***' + access_token[-10:] if access_token else 'None'}"
+            )
             return access_token
         except ValueError as e:
             print(f"[DEBUG] Failed to parse JSON response: {str(e)}")
-            raise Exception(f"Invalid JSON response from external API: {str(e)}")
+            raise Exception(
+                f"Invalid JSON response from external API: {str(e)}")
 
     except requests.exceptions.ConnectTimeout:
         print(f"[DEBUG] Connection timeout to {auth_url}")
@@ -207,59 +219,61 @@ def authenticate_external_api():
         print(f"[DEBUG] Unexpected error: {str(e)}")
         raise Exception(f"External API authentication error: {str(e)}")
 
+
 def send_search_request_to_external_api(access_token, search_data):
     """Send search request to external API and return job ID"""
     try:
         api_url = os.getenv('TRAVEL_API_URL')
         if not api_url:
             raise Exception("External API URL not configured")
-        
+
         search_url = f"{api_url}/search"
-        
+
         headers = {
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json'
         }
-        
+
         print(f"[DEBUG] Sending search request to: {search_url}")
         print(f"[DEBUG] Request headers: {headers}")
         print(f"[DEBUG] Request body: {search_data}")
-        
+
         # Make search request with SSL verification disabled for development
         verify_ssl = not api_url.startswith('https://localhost')
-        
-        response = requests.post(
-            search_url,
-            json=search_data,
-            headers=headers,
-            timeout=30,
-            verify=verify_ssl
-        )
-        
+
+        response = requests.post(search_url,
+                                 json=search_data,
+                                 headers=headers,
+                                 timeout=30,
+                                 verify=verify_ssl)
+
         print(f"[DEBUG] Search response status: {response.status_code}")
         print(f"[DEBUG] Search response content: {response.text}")
-        
+
         if response.status_code == 401:
             raise Exception("Authentication failed for search request")
-        
+
         if not response.ok:
-            raise Exception(f"Search request failed: {response.status_code} - {response.text}")
-        
+            raise Exception(
+                f"Search request failed: {response.status_code} - {response.text}"
+            )
+
         try:
             response_data = response.json()
-            job_id = response_data.get('job_id') or response_data.get('id') or response_data.get('task_id')
-            
+            job_id = response_data.get('job_id') or response_data.get(
+                'id') or response_data.get('task_id')
+
             if not job_id:
                 print(f"[DEBUG] No job ID found in response: {response_data}")
                 raise Exception("No job ID returned from search request")
-            
+
             print(f"[DEBUG] Job ID received: {job_id}")
             return job_id
-            
+
         except ValueError as e:
             print(f"[DEBUG] Failed to parse search response JSON: {str(e)}")
             raise Exception(f"Invalid JSON response from search API: {str(e)}")
-    
+
     except requests.exceptions.ConnectTimeout:
         print(f"[DEBUG] Search request timeout to {search_url}")
         raise Exception(f"Search request timeout to external API")
@@ -272,6 +286,7 @@ def send_search_request_to_external_api(access_token, search_data):
     except Exception as e:
         print(f"[DEBUG] Unexpected search error: {str(e)}")
         raise Exception(f"Search request error: {str(e)}")
+
 
 # Validation schema for travel form
 class TravelFormSchema(Schema):
@@ -295,6 +310,7 @@ class TravelFormSchema(Schema):
     special_services = fields.Str(required=False, allow_none=True)
     email = fields.Email(required=True)
 
+
 @travel_bp.route('/submit-form', methods=['POST'])
 def submit_travel_form():
     """Submit travel configuration form"""
@@ -303,18 +319,23 @@ def submit_travel_form():
         schema = TravelFormSchema()
         data = schema.load(request.json)
     except ValidationError as err:
-        return jsonify({'error': 'Validation error', 'details': err.messages}), 400
+        return jsonify({
+            'error': 'Validation error',
+            'details': err.messages
+        }), 400
 
     try:
         # Authenticate with external travel API
         print(f"[DEBUG] Starting external API authentication process...")
         try:
             external_token = authenticate_external_api()
-            print(f"[DEBUG] Successfully authenticated with external API, token received: {'***' + external_token[-10:] if external_token else 'None'}")
+            print(
+                f"[DEBUG] Successfully authenticated with external API, token received: {'***' + external_token[-10:] if external_token else 'None'}"
+            )
         except Exception as e:
             print(f"[DEBUG] External API authentication failed: {str(e)}")
             return jsonify({
-                'error': 'External service authentication failed', 
+                'error': 'External service authentication failed',
                 'details': str(e)
             }), 503
 
@@ -326,12 +347,13 @@ def submit_travel_form():
         # Send search request to external API
         print(f"[DEBUG] Sending search request to external API...")
         try:
-            job_id = send_search_request_to_external_api(external_token, external_search_data)
+            job_id = send_search_request_to_external_api(
+                external_token, external_search_data)
             print(f"[DEBUG] Search job started successfully with ID: {job_id}")
         except Exception as e:
             print(f"[DEBUG] External search request failed: {str(e)}")
             return jsonify({
-                'error': 'External search request failed', 
+                'error': 'External search request failed',
                 'details': str(e)
             }), 503
 
@@ -393,16 +415,26 @@ def submit_travel_form():
         # 3. Send confirmation email to user
 
         return jsonify({
-            'message': 'Travel request submitted successfully',
-            'travel_id': travel_id,
-            'status': 'submitted',
-            'external_api_authenticated': True,
-            'external_job_id': job_id,
-            'next_steps': 'Our local experts will review your request and send you personalized proposals via email within 24-48 hours.'
+            'message':
+            'Travel request submitted successfully',
+            'travel_id':
+            travel_id,
+            'status':
+            'submitted',
+            'external_api_authenticated':
+            True,
+            'external_job_id':
+            job_id,
+            'next_steps':
+            'Our virtual expert will review your request and send you personalized proposals within 2-3 minutes.'
         }), 201
 
     except Exception as e:
-        return jsonify({'error': 'Failed to submit travel request', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to submit travel request',
+            'details': str(e)
+        }), 500
+
 
 @travel_bp.route('/my-travels', methods=['GET'])
 @jwt_required()
@@ -413,10 +445,9 @@ def get_user_travels():
 
         # Search for user's travels
         search_result = opensearch_ops.search_documents(
-            'travels',
-            query={'term': {'user_id': user_id}},
-            size=50
-        )
+            'travels', query={'term': {
+                'user_id': user_id
+            }}, size=50)
 
         travels = []
         for hit in search_result['hits']['hits']:
@@ -431,13 +462,14 @@ def get_user_travels():
                 'contact_email': travel_data['contact_email']
             })
 
-        return jsonify({
-            'travels': travels,
-            'total': len(travels)
-        }), 200
+        return jsonify({'travels': travels, 'total': len(travels)}), 200
 
     except Exception as e:
-        return jsonify({'error': 'Failed to get travels', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to get travels',
+            'details': str(e)
+        }), 500
+
 
 @travel_bp.route('/travel/<travel_id>', methods=['GET'])
 @jwt_required()
@@ -454,17 +486,16 @@ def get_travel_details(travel_id):
         if travel_data.get('user_id') != user_id:
             return jsonify({'error': 'Access denied'}), 403
 
-        return jsonify({
-            'travel': {
-                'id': travel_id,
-                **travel_data
-            }
-        }), 200
+        return jsonify({'travel': {'id': travel_id, **travel_data}}), 200
 
     except Exception as e:
         if 'not found' in str(e).lower():
             return jsonify({'error': 'Travel request not found'}), 404
-        return jsonify({'error': 'Failed to get travel details', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to get travel details',
+            'details': str(e)
+        }), 500
+
 
 @travel_bp.route('/travel/<travel_id>/status', methods=['PUT'])
 @jwt_required()
@@ -478,7 +509,10 @@ def update_travel_status(travel_id):
             return jsonify({'error': 'Status is required'}), 400
 
         # Valid status transitions
-        valid_statuses = ['submitted', 'processing', 'proposals_sent', 'booked', 'completed', 'cancelled']
+        valid_statuses = [
+            'submitted', 'processing', 'proposals_sent', 'booked', 'completed',
+            'cancelled'
+        ]
         if data['status'] not in valid_statuses:
             return jsonify({'error': 'Invalid status'}), 400
 
@@ -487,11 +521,12 @@ def update_travel_status(travel_id):
         travel_data = travel_doc['_source']
 
         # Update status
-        opensearch_ops.update_document('travels', travel_id, {
-            'status': data['status'],
-            'updated_at': datetime.utcnow().isoformat(),
-            'updated_by': user_id
-        })
+        opensearch_ops.update_document(
+            'travels', travel_id, {
+                'status': data['status'],
+                'updated_at': datetime.utcnow().isoformat(),
+                'updated_by': user_id
+            })
 
         return jsonify({
             'message': 'Travel status updated successfully',
@@ -502,7 +537,11 @@ def update_travel_status(travel_id):
     except Exception as e:
         if 'not found' in str(e).lower():
             return jsonify({'error': 'Travel request not found'}), 404
-        return jsonify({'error': 'Failed to update travel status', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to update travel status',
+            'details': str(e)
+        }), 500
+
 
 @travel_bp.route('/statistics', methods=['GET'])
 @jwt_required()
@@ -513,10 +552,9 @@ def get_travel_statistics():
 
         # Get user's travels
         search_result = opensearch_ops.search_documents(
-            'travels',
-            query={'term': {'user_id': user_id}},
-            size=100
-        )
+            'travels', query={'term': {
+                'user_id': user_id
+            }}, size=100)
 
         travels = [hit['_source'] for hit in search_result['hits']['hits']]
 
@@ -536,39 +574,105 @@ def get_travel_statistics():
 
         return jsonify({
             'statistics': {
-                'total_travels': total_travels,
-                'status_breakdown': status_counts,
-                'popular_passions': dict(sorted(passion_counts.items(), key=lambda x: x[1], reverse=True)[:5])
+                'total_travels':
+                total_travels,
+                'status_breakdown':
+                status_counts,
+                'popular_passions':
+                dict(
+                    sorted(passion_counts.items(),
+                           key=lambda x: x[1],
+                           reverse=True)[:5])
             }
         }), 200
 
     except Exception as e:
-        return jsonify({'error': 'Failed to get statistics', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to get statistics',
+            'details': str(e)
+        }), 500
+
 
 @travel_bp.route('/destinations', methods=['GET'])
 def get_destinations():
     """Get available destinations (public endpoint)"""
     # This would typically come from a database
-    destinations = [
-        {'id': 'sardegna', 'name': 'Sardegna', 'region': 'Isole'},
-        {'id': 'toscana', 'name': 'Toscana', 'region': 'Centro'},
-        {'id': 'sicilia', 'name': 'Sicilia', 'region': 'Isole'},
-        {'id': 'piemonte', 'name': 'Piemonte', 'region': 'Nord'},
-        {'id': 'trentino-alto-adige', 'name': 'Trentino-Alto Adige', 'region': 'Nord'},
-        {'id': 'campania', 'name': 'Campania', 'region': 'Sud'},
-        {'id': 'veneto', 'name': 'Veneto', 'region': 'Nord'},
-        {'id': 'liguria', 'name': 'Liguria', 'region': 'Nord'},
-        {'id': 'puglia', 'name': 'Puglia', 'region': 'Sud'},
-        {'id': 'friuli-venezia-giulia', 'name': 'Friuli-Venezia Giulia', 'region': 'Nord'},
-        {'id': 'valle-d-aosta', 'name': "Valle d'Aosta", 'region': 'Nord'},
-        {'id': 'lombardia', 'name': 'Lombardia', 'region': 'Nord'},
-        {'id': 'emilia-romagna', 'name': 'Emilia-Romagna', 'region': 'Nord'},
-        {'id': 'lazio', 'name': 'Lazio', 'region': 'Centro'},
-        {'id': 'calabria', 'name': 'Calabria', 'region': 'Sud'},
-        {'id': 'molise', 'name': 'Molise', 'region': 'Sud'},
-        {'id': 'basilicata', 'name': 'Basilicata', 'region': 'Sud'},
-        {'id': 'marche', 'name': 'Marche', 'region': 'Centro'},
-        {'id': 'umbria', 'name': 'Umbria', 'region': 'Centro'}
-    ]
+    destinations = [{
+        'id': 'sardegna',
+        'name': 'Sardegna',
+        'region': 'Isole'
+    }, {
+        'id': 'toscana',
+        'name': 'Toscana',
+        'region': 'Centro'
+    }, {
+        'id': 'sicilia',
+        'name': 'Sicilia',
+        'region': 'Isole'
+    }, {
+        'id': 'piemonte',
+        'name': 'Piemonte',
+        'region': 'Nord'
+    }, {
+        'id': 'trentino-alto-adige',
+        'name': 'Trentino-Alto Adige',
+        'region': 'Nord'
+    }, {
+        'id': 'campania',
+        'name': 'Campania',
+        'region': 'Sud'
+    }, {
+        'id': 'veneto',
+        'name': 'Veneto',
+        'region': 'Nord'
+    }, {
+        'id': 'liguria',
+        'name': 'Liguria',
+        'region': 'Nord'
+    }, {
+        'id': 'puglia',
+        'name': 'Puglia',
+        'region': 'Sud'
+    }, {
+        'id': 'friuli-venezia-giulia',
+        'name': 'Friuli-Venezia Giulia',
+        'region': 'Nord'
+    }, {
+        'id': 'valle-d-aosta',
+        'name': "Valle d'Aosta",
+        'region': 'Nord'
+    }, {
+        'id': 'lombardia',
+        'name': 'Lombardia',
+        'region': 'Nord'
+    }, {
+        'id': 'emilia-romagna',
+        'name': 'Emilia-Romagna',
+        'region': 'Nord'
+    }, {
+        'id': 'lazio',
+        'name': 'Lazio',
+        'region': 'Centro'
+    }, {
+        'id': 'calabria',
+        'name': 'Calabria',
+        'region': 'Sud'
+    }, {
+        'id': 'molise',
+        'name': 'Molise',
+        'region': 'Sud'
+    }, {
+        'id': 'basilicata',
+        'name': 'Basilicata',
+        'region': 'Sud'
+    }, {
+        'id': 'marche',
+        'name': 'Marche',
+        'region': 'Centro'
+    }, {
+        'id': 'umbria',
+        'name': 'Umbria',
+        'region': 'Centro'
+    }]
 
     return jsonify({'destinations': destinations}), 200
