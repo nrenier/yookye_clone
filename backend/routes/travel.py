@@ -236,7 +236,7 @@ def send_search_request_to_external_api(access_token, search_data):
         if not api_url:
             raise Exception("External API URL not configured")
 
-        search_url = f"{api_url}/search"
+        search_url = f"{api_url}/api/search"
 
         headers = {
             'Authorization': f'Bearer {access_token}',
