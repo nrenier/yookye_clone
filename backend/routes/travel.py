@@ -73,6 +73,72 @@ def map_form_data_to_external_format(form_data):
         "livello": {
             "fascia_media": acc_level == 'mid',
 
+"boutique": acc_level == 'boutique',
+            "eleganti": acc_level == 'luxury'
+        },
+        "tipologia": {
+            "hotel": acc_type == 'hotel',
+            "b&b": acc_type == 'bnb',
+            "agriturismo": acc_type == 'agriturismo',
+            "villa": acc_type == 'villa',
+            "appartamento": acc_type == 'appartamento',
+            "glamping": acc_type == 'glamping'
+        }
+    }
+
+    # Map passions to interests
+    passions = form_data.get('passions', [])
+    interessi = {
+        "storia_e_arte": {
+            "musei_e_gallerie": "Musei e gallerie" in passions,
+            "siti_archeologici": "Siti archeologici" in passions,
+            "monumenti_e_architettura": "Monumenti e architetture" in passions
+        },
+        "Food_&_wine": {
+            "visite_alle_cantine": "Visite alle cantine" in passions,
+            "corsi_di_cucina": "Corsi di cucina" in passions,
+            "soggiorni_nella_wine_country": "Soggiorni nella Wine Country" in passions
+        },
+        "vacanze_attive": {
+            "trekking_di_piu_giorni": "Trekking tour" in passions,
+            "tour_in_e_bike_di_piu_giorni": "Tour in e-bike" in passions,
+            "sci_snowboard_di_piu_giorni": "Sci/snowboard" in passions
+        },
+        "vita_locale": "Local Life" in passions,
+        "salute_e_benessere": "Salute & Benessere" in passions
+    }
+
+    # Map traveler type
+    traveler_type = form_data.get('traveler_type', '')
+    tipologia_viaggiatore = {
+        "family": traveler_type == 'famiglia',
+        "amici": traveler_type == 'amici',
+        "coppia": traveler_type == 'coppia',
+        "single": False  # Not explicitly in our form
+    }
+
+    # Map travel pace
+    pace = form_data.get('travel_pace', '')
+    ritmo_ideale = {
+        "veloce": pace == 'fast',
+        "moderato": pace == 'moderate',
+        "rilassato": pace == 'relaxed'
+    }
+
+    return {
+        "trasporti": trasporti,
+        "luoghi_da_non_perdere": luoghi_da_non_perdere,
+        "viaggiatori": viaggiatori,
+        "date": date,
+        "budget_per_persona_giorno": budget_per_persona_giorno,
+        "sistemazione": sistemazione,
+        "esigenze_particolari": form_data.get('special_services', ''),
+        "interessi": interessi,
+        "tipologia_viaggiatore": tipologia_viaggiatore,
+        "ritmo_ideale": ritmo_ideale
+    }
+
+
 def save_travel_packages(job_id, packages_data):
     """Save travel packages received from external API to database"""
     try:
@@ -103,20 +169,6 @@ def save_travel_packages(job_id, packages_data):
     except Exception as e:
         print(f"[ERROR] Failed to save travel packages: {str(e)}")
         return 0
-
-
-            "boutique": acc_level == 'boutique',
-            "eleganti": acc_level == 'luxury'
-        },
-        "tipologia": {
-            "hotel": acc_type == 'hotel',
-            "b&b": acc_type == 'bnb',
-            "agriturismo": acc_type == 'agriturismo',
-            "villa": acc_type == 'villa',
-            "appartamento": acc_type == 'appartamento',
-            "glamping": acc_type == 'glamping'
-        }
-    }
 
     # Map passions to interests
     passions = form_data.get('passions', [])
