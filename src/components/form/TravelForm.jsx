@@ -20,9 +20,11 @@ import {
   useTheme,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function TravelForm() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     passions: [],
@@ -111,36 +113,18 @@ function TravelForm() {
       // Log job ID if available
       if (response.external_job_id) {
         console.log(`🚀 Job ID remoto lanciato: ${response.external_job_id}`);
+        
+        // Redirect to loading page with job ID
+        navigate('/loading', { 
+          state: { 
+            jobId: response.external_job_id,
+            travelId: response.travel_id
+          }
+        });
+      } else {
+        // Fallback if no job ID received
+        alert(`Richiesta inviata con successo! ${response.next_steps}`);
       }
-
-      // Show success message
-      const jobMessage = response.external_job_id 
-        ? `\n\nJob ID remoto: ${response.external_job_id}` 
-        : '';
-      alert(`Richiesta inviata con successo! ${response.next_steps}${jobMessage}`);
-
-      // Reset form
-      setFormData({
-        passions: [],
-        specificPlaces: "",
-        placesToVisit: "",
-        preferredDestinations: "",
-        travelPace: "",
-        accommodationLevel: "",
-        accommodationType: "",
-        adults: 1,
-        children: 0,
-        infants: 0,
-        rooms: 1,
-        travelerType: "",
-        checkIn: "",
-        checkOut: "",
-        transportationKnown: "",
-        arrivalDeparture: "",
-        budget: "",
-        specialServices: "",
-        email: "",
-      });
     } catch (error) {
       console.error("Error submitting form:", error);
       alert(`Errore nell'invio del form: ${error.message}`);
